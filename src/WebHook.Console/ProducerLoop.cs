@@ -46,7 +46,7 @@ public class ProducerLoop
             // in reality, when multiple Producer nodes are deployed, the batchSize
             // is only observed in scope of a single node. So, globally (or from the perspective
             // of the dispatchItemStore), the size of a batch can be somewhere from 1 to 
-            // number_of_replicas * (batchSize - 1) items.
+            // number_of_nodes * (batchSize - 1) items.
             if (batchSizeReached) 
             {
                 // NOTE: first get a successful "commit" from the dispatch store
