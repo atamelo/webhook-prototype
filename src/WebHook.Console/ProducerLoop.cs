@@ -22,6 +22,7 @@ public class ProducerLoop
     {
         isBreakRequested = false;
 
+        // TODO: this should be tracked on per-partition basis!!
         long eventsProcessed = 0;
 
         while (isBreakRequested is false)
