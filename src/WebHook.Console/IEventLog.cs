@@ -12,5 +12,5 @@ public interface IEventLog
 {
     EventEnvelope PollForNext();
 
-    void Acknowledge(long offset);
+    void AcknowledgeUpTo(long offset);
 }
