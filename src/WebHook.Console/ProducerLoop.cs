@@ -22,7 +22,8 @@ public class ProducerLoop
     {
         isBreakRequested = false;
 
-        // TODO: this should be tracked on per-partition basis!!
+        // NOTE: this is kind of a global (i.e. across all the assigned partitions)
+        // batch size counter
         long eventsProcessed = 0;
 
         while (isBreakRequested is false)
@@ -48,7 +49,7 @@ public class ProducerLoop
                 dispatchItemStore.PersistChanges();
 
                 // NOTE: an only then do a commit at the source
-                eventLog.AcknowledgeUpTo(envelope.Offset);
+                eventLog.AcknowledgeUpTo(envelope);
             }
         }
     }
