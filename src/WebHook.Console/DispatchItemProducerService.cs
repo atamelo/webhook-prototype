@@ -23,7 +23,7 @@ internal partial class Program
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            this.logger.LogInformation("Starting the service.");
+            this.logger.LogInformation("Starting the service...");
 
             // TODO: read it from the .NET config system
             ProducerLoop.ProducerConfig producerConfig = new();
