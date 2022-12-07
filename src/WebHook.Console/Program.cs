@@ -11,9 +11,10 @@ internal class Program
     {
         Console.WriteLine("Starting the producer loop");
 
-        // TODO: read it from a config file/env/commandline
+        // TODO: read it from the .NET config system
         ProducerConfig producerConfig = new();
 
+        // TODO: read it from a config file/env/commandline
         ProducerLoop.EventLogConsumerConfig consumerConfig = new(Array.Empty<string>());
 
         // TODO: wrap it into IHostedService
