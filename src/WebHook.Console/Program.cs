@@ -14,9 +14,11 @@ internal class Program
         // TODO: read it from a config file/env/commandline
         ProducerConfig producerConfig = new();
 
-        // TODO: wrap it into IHostedService
-        ProducerLoop loop = new(null!, null!, null!);
+        ProducerLoop.EventLogConsumerConfig consumerConfig = new(Array.Empty<string>());
 
-        loop.Start(commitBatchSize: producerConfig.CommitBatchSize);
+        // TODO: wrap it into IHostedService
+        ProducerLoop loop = new(null!, null!);
+
+        loop.Start(consumerConfig, CancellationToken.None, commitBatchSize: producerConfig.CommitBatchSize);
     }
 }

@@ -2,5 +2,6 @@
 
 public interface ISubscriptionStore
 {
-    IReadOnlyList<string> GetEndpointsFor<TEvent>(TEvent @event) where TEvent : IEvent;
+    // TODO: async
+    IReadOnlyList<string> GetEndpointsFor<TEvent>(TEvent @event, CancellationToken cancellationToken) where TEvent : IEvent;
 }
