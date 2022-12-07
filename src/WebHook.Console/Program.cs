@@ -1,25 +1,19 @@
-﻿using WebHook.Console;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
-internal class Program
+internal partial class Program
 {
-    public class ProducerConfig
+    private async static Task Main(string[] args)
     {
-        public int CommitBatchSize { get; } = 50;
-    }
+        IHost host =
+            new HostBuilder()
+               .ConfigureServices((hostContext, services) =>
+               {
+                   services.AddHostedService<DispatchItemProducerService>();
+               })
+               .UseConsoleLifetime()
+               .Build();
 
-    private static void Main(string[] args)
-    {
-        Console.WriteLine("Starting the producer loop");
-
-        // TODO: read it from the .NET config system
-        ProducerConfig producerConfig = new();
-
-        // TODO: read it from a config file/env/commandline
-        ProducerLoop.EventLogConsumerConfig consumerConfig = new(Array.Empty<string>());
-
-        // TODO: wrap it into IHostedService
-        ProducerLoop loop = new(null!, null!);
-
-        loop.Start(consumerConfig, CancellationToken.None, commitBatchSize: producerConfig.CommitBatchSize);
+        await host.RunAsync();
     }
 }

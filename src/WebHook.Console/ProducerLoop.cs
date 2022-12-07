@@ -1,5 +1,5 @@
 ﻿using Confluent.Kafka;
-using System.Text.RegularExpressions;
+using Microsoft.Extensions.Logging;
 
 namespace WebHook.Console;
 
@@ -7,13 +7,16 @@ public class ProducerLoop
 {
     private readonly ISubscriptionStore subscriptionStore;
     private readonly IDispatchItemStore dispatchItemStore;
+    private readonly ILogger<ProducerLoop> logger;
 
     public ProducerLoop(
         ISubscriptionStore subscriptionStore,
-        IDispatchItemStore dispatchItemStore)
+        IDispatchItemStore dispatchItemStore,
+        ILogger<ProducerLoop> logger)
     {
         this.subscriptionStore = subscriptionStore;
         this.dispatchItemStore = dispatchItemStore;
+        this.logger = logger;
     }
 
     public void Start(EventLogConsumerConfig eventLogConsumerConfig, CancellationToken stopSignal, int commitBatchSize = 20)
@@ -25,10 +28,14 @@ public class ProducerLoop
 
         while (stopSignal.IsCancellationRequested is false)
         {
+            this.logger.LogInformation("Producer loop started.");
+
             try
             {
                 // NOTE: in Kafka client this is also a blocking call
                 ConsumeResult<string, IEvent> record = eventLogConsumer.Consume(stopSignal);
+
+                // TODO: add extensive logging
 
                 IReadOnlyList<string> urls = this.subscriptionStore.GetEndpointsFor(record.Message.Value, stopSignal);
 
@@ -60,13 +67,14 @@ public class ProducerLoop
             }
         }
 
-        // TODO: replace with loging
-        System.Console.WriteLine("Producer loop aborted.");
+        this.logger.LogInformation("Producer loop aborted.");
     }
 
     protected virtual IConsumer<string, IEvent> CreateEventLogConsumer(EventLogConsumerConfig config)
     {
-        // TODO: set up proper deserializer
+        this.logger.LogInformation("Creating kafka consumer...");
+
+        // TODO: set up proper deserializer!!
         var builder = new ConsumerBuilder<string, IEvent>(config).SetValueDeserializer(null);
         IConsumer<string, IEvent> kafkaConsumer = builder.Build();
 
@@ -80,5 +88,10 @@ public class ProducerLoop
         public IReadOnlyList<string> TopicNames { get; }
 
         public EventLogConsumerConfig(IReadOnlyList<string> topicNames) => this.TopicNames = topicNames;
+    }
+
+    public class ProducerConfig
+    {
+        public int CommitBatchSize { get; } = 50;
     }
 }
