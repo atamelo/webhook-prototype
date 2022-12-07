@@ -10,3 +10,18 @@ public interface IDispatchItemStore
     
     void PersistChanges();
 }
+
+public class DispatchItemStoreMock : IDispatchItemStore
+{
+    public void PersistChanges()
+    {
+    }
+
+    public void Put(DispatchItem item)
+    {
+    }
+
+    public void Remove(DispatchItem item)
+    {
+    }
+}

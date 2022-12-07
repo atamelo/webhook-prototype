@@ -33,7 +33,7 @@ internal partial class Program
 
             this.producerLoopTask = Task.Factory.StartNew(() =>
             {
-                this.producerLoop.Start(consumerConfig, CancellationToken.None, commitBatchSize: producerConfig.CommitBatchSize);
+                this.producerLoop.Start(consumerConfig, this.cancellation.Token, commitBatchSize: producerConfig.CommitBatchSize);
             }, TaskCreationOptions.LongRunning);
 
             return Task.CompletedTask;
@@ -41,7 +41,7 @@ internal partial class Program
 
         public async Task StopAsync(CancellationToken cancellationToken)
         {
-            this.logger.LogInformation("Stopping service...");
+            this.logger.LogInformation("Stopping the service...");
 
             this.cancellation.Cancel();
             await producerLoopTask;

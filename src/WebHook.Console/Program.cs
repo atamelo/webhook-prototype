@@ -1,5 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using WebHook.Console;
 
 internal partial class Program
 {
@@ -8,6 +11,10 @@ internal partial class Program
         IHost host =
             new HostBuilder()
                .ConfigureServices(ConfigureServices)
+               .ConfigureLogging(loggingBuilder =>
+               {
+                   loggingBuilder.AddSimpleConsole(options => options.UseUtcTimestamp = true);
+               })
                .UseConsoleLifetime()
                .Build();
 
@@ -18,6 +25,9 @@ internal partial class Program
     {
         services.AddHostedService<DispatchItemProducerService>();
 
-        // TODO: add dependencies
+        services.AddTransient<ProducerLoop, ProducerLoopMock>();
+
+        services.AddSingleton<ISubscriptionStore, SubscriptionStoreMock>();
+        services.AddSingleton<IDispatchItemStore, DispatchItemStoreMock>();
     }
 }
