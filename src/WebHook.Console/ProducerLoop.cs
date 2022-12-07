@@ -186,6 +186,8 @@ public class ProducerLoopMock : ProducerLoop
 
         public ConsumeResult<string, IEvent> Consume(CancellationToken cancellationToken = default)
         {
+            // TODO: replace thist b/s with a separate traffic generator chatting over pipes
+            Thread.Sleep(1000);
             return new () { Message = new() { Key = "dummyKey", Value = new DummyEvent("dummySubscriber") } };
         }
 
