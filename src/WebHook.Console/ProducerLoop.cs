@@ -1,8 +1,10 @@
 ﻿using Confluent.Kafka;
 using Microsoft.Extensions.Logging;
 using WebHook.Contracts.Events;
+using WebHook.DispatchItemStore.Client;
+using WebHook.SubscriptionStore.Client;
 
-namespace WebHook.Console;
+namespace WebHook.Producer;
 
 public class ProducerLoop
 {
@@ -25,9 +27,9 @@ public class ProducerLoop
         // NOTE: this is kind of a global (i.e. across all the assigned partitions) batch size counter
         long eventsProcessed = 0;
 
-        using IConsumer<string, IEvent> eventLogConsumer = this.CreateEventLogConsumer(eventLogConsumerConfig);
+        using IConsumer<string, IEvent> eventLogConsumer = CreateEventLogConsumer(eventLogConsumerConfig);
 
-        this.logger.LogInformation("Producer loop starting...");
+        logger.LogInformation("Producer loop starting...");
 
         while (stopSignal.IsCancellationRequested is false)
         {
@@ -38,7 +40,7 @@ public class ProducerLoop
 
                 // TODO: add extensive logging
 
-                IReadOnlyList<string> urls = this.subscriptionStore.GetEndpointsFor(record.Message.Value, stopSignal);
+                IReadOnlyList<string> urls = subscriptionStore.GetEndpointsFor(record.Message.Value, stopSignal);
 
                 foreach (string url in urls)
                 {
@@ -68,12 +70,12 @@ public class ProducerLoop
             }
         }
 
-        this.logger.LogInformation("Producer loop aborted.");
+        logger.LogInformation("Producer loop aborted.");
     }
 
     protected virtual IConsumer<string, IEvent> CreateEventLogConsumer(EventLogConsumerConfig config)
     {
-        this.logger.LogInformation("Creating kafka consumer...");
+        logger.LogInformation("Creating kafka consumer...");
 
         // TODO: set up proper deserializer!!
         var builder = new ConsumerBuilder<string, IEvent>(config).SetValueDeserializer(null);
@@ -88,7 +90,7 @@ public class ProducerLoop
     {
         public IReadOnlyList<string> TopicNames { get; }
 
-        public EventLogConsumerConfig(IReadOnlyList<string> topicNames) => this.TopicNames = topicNames;
+        public EventLogConsumerConfig(IReadOnlyList<string> topicNames) => TopicNames = topicNames;
     }
 
     public class ProducerConfig
@@ -189,7 +191,7 @@ public class ProducerLoopMock : ProducerLoop
         {
             // TODO: replace thist b/s with a separate traffic generator chatting over pipes
             Thread.Sleep(1000);
-            return new () { Message = new() { Key = "dummyKey", Value = new DummyEvent("dummySubscriber") } };
+            return new() { Message = new() { Key = "dummyKey", Value = new DummyEvent("dummySubscriber") } };
         }
 
         public ConsumeResult<string, IEvent> Consume(TimeSpan timeout)

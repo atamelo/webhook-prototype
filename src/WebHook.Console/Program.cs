@@ -1,8 +1,11 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using WebHook.Console;
+using WebHook.DispatchItemStore.Client;
+using WebHook.Producer;
+using WebHook.SubscriptionStore.Client;
+
+namespace WebHook.Producer;
 
 internal partial class Program
 {

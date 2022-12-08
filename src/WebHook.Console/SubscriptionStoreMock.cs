@@ -1,12 +1,7 @@
 ﻿using WebHook.Contracts.Events;
+using WebHook.SubscriptionStore.Client;
 
-namespace WebHook.Console;
-
-public interface ISubscriptionStore
-{
-    // TODO: async
-    IReadOnlyList<string> GetEndpointsFor<TEvent>(TEvent @event, CancellationToken cancellationToken) where TEvent : IEvent;
-}
+namespace WebHook.Producer;
 
 public class SubscriptionStoreMock : ISubscriptionStore
 {
