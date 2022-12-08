@@ -1,7 +1,7 @@
 ﻿using WebHook.Contracts.Events;
 using WebHook.SubscriptionStore.Client;
 
-namespace WebHook.Producer;
+namespace WebHook.Producer.Mocks;
 
 public class SubscriptionStoreMock : ISubscriptionStore
 {

@@ -1,6 +1,6 @@
 ﻿using WebHook.DispatchItemStore.Client;
 
-namespace WebHook.Producer;
+namespace WebHook.Producer.Mocks;
 
 public class DispatchItemStoreMock : IDispatchItemStore
 {
