@@ -10,5 +10,7 @@ public interface IDispatchItemStore
 
     void Remove(DispatchItem item);
 
+    DispatchItem GetNext();
+
     void PersistChanges();
 }

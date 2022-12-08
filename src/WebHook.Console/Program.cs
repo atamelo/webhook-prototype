@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
+using System.IO.Pipes;
 using WebHook.Contracts.Events;
 using WebHook.DispatchItemStore.Client;
 using WebHook.Producer.Mocks;

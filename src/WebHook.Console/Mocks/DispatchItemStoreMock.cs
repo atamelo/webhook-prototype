@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using System.IO.Pipes;
 using WebHook.DispatchItemStore.Client;
 
 namespace WebHook.Producer.Mocks;
@@ -10,6 +11,11 @@ public class DispatchItemStoreMock : IDispatchItemStore
     public DispatchItemStoreMock(ILogger<DispatchItemStoreMock> logger)
     {
         this.logger = logger;
+    }
+
+    public DispatchItem GetNext()
+    {
+        throw new NotImplementedException();
     }
 
     public void PersistChanges()
