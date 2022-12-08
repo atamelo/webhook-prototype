@@ -1,4 +1,4 @@
-﻿namespace WebHook.Console;
+﻿namespace WebHook.Contracts.Events;
 
 public interface IEvent
 {

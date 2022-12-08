@@ -1,4 +1,6 @@
-﻿namespace WebHook.Console;
+﻿using WebHook.Contracts.Events;
+
+namespace WebHook.Console;
 
 public readonly record struct DispatchItem(string EndpointUrl, IEvent Event);
 

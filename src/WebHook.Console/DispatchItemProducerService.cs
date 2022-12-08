@@ -4,6 +4,7 @@ using WebHook.Console;
 
 internal partial class Program
 {
+    // TODO: inherit form BackgroundService instead?
     public class DispatchItemProducerService : IHostedService
     {
         private readonly ProducerLoop producerLoop;
@@ -33,6 +34,10 @@ internal partial class Program
 
             this.producerLoopTask = Task.Factory.StartNew(() =>
             {
+                // NOTE: when directly implementing IHostedService exceptions like this won't surface
+                // until the stop (Ctrl-C) the service
+                // Consider inheriting from BackgroundService instead
+               //throw null;
                 this.producerLoop.Start(consumerConfig, this.cancellation.Token, commitBatchSize: producerConfig.CommitBatchSize);
             }, TaskCreationOptions.LongRunning);
 
@@ -44,6 +49,7 @@ internal partial class Program
             this.logger.LogInformation("Stopping the service...");
 
             this.cancellation.Cancel();
+            // NOTE: here is the point where exeprions are going to surface
             await producerLoopTask;
 
             this.logger.LogInformation("Service stopped.");

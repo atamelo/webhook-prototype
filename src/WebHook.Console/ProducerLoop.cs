@@ -1,5 +1,6 @@
 ﻿using Confluent.Kafka;
 using Microsoft.Extensions.Logging;
+using WebHook.Contracts.Events;
 
 namespace WebHook.Console;
 
