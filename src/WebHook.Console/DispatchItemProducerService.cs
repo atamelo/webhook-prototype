@@ -49,7 +49,7 @@ public class DispatchItemProducerService : IHostedService
         this.logger.LogInformation("Stopping the service...");
 
         this.cancellation.Cancel();
-        // NOTE: here is the point where exeprions are going to surface
+        // NOTE: here is the point where exceptions are going to surface
         await producerLoopTask;
 
         this.logger.LogInformation("Service stopped.");

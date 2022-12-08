@@ -1,6 +1,9 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Confluent.Kafka;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System.Collections.Concurrent;
+using WebHook.Contracts.Events;
 using WebHook.DispatchItemStore.Client;
 using WebHook.Producer.Mocks;
 using WebHook.SubscriptionStore.Client;
@@ -30,14 +33,30 @@ internal partial class Program
 
         services.AddTransient<ProducerLoop, ProducerLoopMock>(factory =>
         {
-            var subscriptionStore = factory.GetService<ISubscriptionStore>();
-            var dispatchItemStore = factory.GetService<IDispatchItemStore>();
-            var logger = factory.GetService<ILogger<ProducerLoop>>();
+            var subscriptionStore = factory.GetService<ISubscriptionStore>()!;
+            var dispatchItemStore = factory.GetService<IDispatchItemStore>()!;
+            var logger = factory.GetService<ILogger<ProducerLoop>>()!;
 
-            return new ProducerLoopMock(subscriptionStore!, dispatchItemStore!, logger!, new());
+            BlockingCollection<IEvent> fakeEventQueue = new();
+
+            // NOTE: unobserved task!!
+            Task fakeGenerator = Task.Factory.StartNew(async () =>
+            {
+                while (true)
+                {
+                    fakeEventQueue.Add(new DummyEvent(DateTime.Now.ToString()));
+
+                    await Task.Delay(TimeSpan.FromSeconds(1));
+                }
+
+            }, TaskCreationOptions.LongRunning);
+
+            return new ProducerLoopMock(subscriptionStore, dispatchItemStore, logger, fakeEventQueue);
         });
 
         services.AddSingleton<ISubscriptionStore, SubscriptionStoreMock>();
         services.AddSingleton<IDispatchItemStore, DispatchItemStoreMock>();
     }
+
+    private record DummyEvent(string SubscriberID) : IEvent;
 }

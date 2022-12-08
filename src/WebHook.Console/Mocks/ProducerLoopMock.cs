@@ -25,8 +25,6 @@ public class ProducerLoopMock : ProducerLoop
         return new KafkaConsumerMock(this.source);
     }
 
-    private record DummyEvent(string SubscriberID) : IEvent;
-
     private class KafkaConsumerMock : IConsumer<string, IEvent>
     {
         private readonly BlockingCollection<IEvent> source;
