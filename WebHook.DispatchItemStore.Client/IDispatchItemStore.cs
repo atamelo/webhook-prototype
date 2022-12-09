@@ -2,7 +2,7 @@
 
 namespace WebHook.DispatchItemStore.Client;
 
-public readonly record struct DispatchItem(string EndpointUrl, IEvent Event);
+public readonly record struct DispatchItem(Guid Id, string EndpointUrl, IEvent Event);
 
 public interface IDispatchItemStore
 {

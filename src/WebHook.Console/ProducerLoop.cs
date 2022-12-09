@@ -44,7 +44,7 @@ public class ProducerLoop
 
                 foreach (string url in urls)
                 {
-                    DispatchItem item = new(url, record.Message.Value);
+                    DispatchItem item = new(Guid.NewGuid(), url, record.Message.Value);
                     dispatchItemStore.Put(item);
                 }
 
