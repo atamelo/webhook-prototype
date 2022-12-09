@@ -10,7 +10,8 @@ public interface IDispatchItemStore
 
     void Remove(DispatchItem item);
 
-    DispatchItem GetNext();
+    DispatchItem? GetNextOrDefault();
 
     void PersistChanges();
+    IReadOnlyCollection<DispatchItem> GetInFlightList();
 }

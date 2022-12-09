@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using StackExchange.Redis;
 using System.Runtime.InteropServices.JavaScript;
 
@@ -11,18 +12,42 @@ namespace WebHook.DispatchItemStore.Client.Redis
 
         readonly RedisKey dispatchListKey;
         readonly RedisKey inFlightListKey;
+        Dictionary<Guid, RedisValue> inFlightItems = new();
         public RedisDispatchItemStore(string connectionString = "localhost")
         {
+            //TODO FIX
+            //Hack until I get env variables and config for docker setup
+            #if !DEBUG
+                connectionString = "redis:6379";
+            #endif
+
             redis = ConnectionMultiplexer.Connect(connectionString);
             dispatchListKey = new RedisKey(nameof(dispatchListKey));
             inFlightListKey = new RedisKey(nameof(inFlightListKey));
         }
-        public DispatchItem GetNext()
+        public IReadOnlyCollection<DispatchItem> GetInFlightList()
+        {
+
+             return db.ListRange(inFlightListKey).Select(rv =>
+             {
+                 DispatchItem returnItem = ToDispatchItem(rv);
+                 inFlightItems.Add(returnItem.Id, rv);
+                 return returnItem;
+             }).ToList();
+
+        }
+        public DispatchItem? GetNextOrDefault()
         {
             RedisValue item = db.ListMove(dispatchListKey, inFlightListKey, ListSide.Left, ListSide.Right);
+
+            if (item.HasValue is false)
+                return null;
+
             DispatchItem returnItem = ToDispatchItem(item);
+            inFlightItems.Add(returnItem.Id, item);
+
             return returnItem;
-        }        
+        }
         public void PersistChanges()
         {
 
@@ -34,13 +59,18 @@ namespace WebHook.DispatchItemStore.Client.Redis
         }
         public void Remove(DispatchItem item)
         {
-            RedisValue redisValue = ToRedisValue(item);
-            db.ListRemove(inFlightListKey, redisValue);
+            if (inFlightItems.ContainsKey(item.Id))
+            {
+                db.ListRemove(inFlightListKey, inFlightItems[item.Id]);
+            }
+
         }
         private DispatchItem ToDispatchItem(RedisValue value)
         {
             JObject obj = JObject.Parse(value.ToString());
-            DispatchItem returnItem = obj.ToObject<DispatchItem>();
+            var jsonSerializer = new JsonSerializer();
+            jsonSerializer.Converters.Add(new EventConverter());
+            DispatchItem returnItem = obj.ToObject<DispatchItem>(jsonSerializer);
             return returnItem;
         }
         private RedisValue ToRedisValue(DispatchItem item)

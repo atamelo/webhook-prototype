@@ -59,5 +59,5 @@ internal partial class Program
         services.AddSingleton<IDispatchItemStore, RedisDispatchItemStore>();
     }
 
-    private record DummyEvent(string SubscriberID) : IEvent;
+    
 }

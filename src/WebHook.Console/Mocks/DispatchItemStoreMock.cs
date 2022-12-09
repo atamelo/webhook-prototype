@@ -13,7 +13,12 @@ public class DispatchItemStoreMock : IDispatchItemStore
         this.logger = logger;
     }
 
-    public DispatchItem GetNext()
+    public IReadOnlyCollection<DispatchItem> GetInFlightList()
+    {
+        throw new NotImplementedException();
+    }
+
+    public DispatchItem? GetNextOrDefault()
     {
         throw new NotImplementedException();
     }

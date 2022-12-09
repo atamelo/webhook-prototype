@@ -1,5 +1,7 @@
 version: '2'
-
+networks:
+  app-network:
+    driver: bridge
 services:
   redis:
     image: docker.io/bitnami/redis:latest
@@ -8,10 +10,17 @@ services:
       - ALLOW_EMPTY_PASSWORD=yes
       - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
     ports:
-      - '6379:6379'
+      - '127.0.0.1:6379:6379'
     volumes:
       - 'redis_data:/bitnami/redis/data'
-
+    networks:
+      - app-network
+  dispatcher:
+    build:
+      context: ../
+      dockerfile: DispatcherDockerfile
+    networks:
+      - app-network
 volumes:
   redis_data:
     driver: local
