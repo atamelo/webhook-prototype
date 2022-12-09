@@ -3,9 +3,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
-using System.IO.Pipes;
 using WebHook.Contracts.Events;
 using WebHook.DispatchItemStore.Client;
+using WebHook.DispatchItemStore.Client.Redis;
 using WebHook.Producer.Mocks;
 using WebHook.SubscriptionStore.Client;
 
@@ -56,7 +56,7 @@ internal partial class Program
         });
 
         services.AddSingleton<ISubscriptionStore, SubscriptionStoreMock>();
-        services.AddSingleton<IDispatchItemStore, DispatchItemStoreMock>();
+        services.AddSingleton<IDispatchItemStore, RedisDispatchItemStore>();
     }
 
     private record DummyEvent(string SubscriberID) : IEvent;

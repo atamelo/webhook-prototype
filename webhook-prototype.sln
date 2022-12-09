@@ -7,21 +7,23 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{4731DDE3-47D
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebHook.Producer", "src\WebHook.Console\WebHook.Producer.csproj", "{76931A20-1E7A-4646-A4CF-11BFFF91B87B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebHook.Contracts", "WebHook.Contracts\WebHook.Contracts.csproj", "{09C1F83D-9431-4518-96BC-DC23E105C870}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebHook.Contracts", "WebHook.Contracts\WebHook.Contracts.csproj", "{09C1F83D-9431-4518-96BC-DC23E105C870}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebHook.Dispatcher", "WebHook.Dispatcher\WebHook.Dispatcher.csproj", "{0B1D2074-308D-42BD-B255-848DB8AB59D8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebHook.Dispatcher", "WebHook.Dispatcher\WebHook.Dispatcher.csproj", "{0B1D2074-308D-42BD-B255-848DB8AB59D8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebHook.SubscriptionStore.Client", "WebHook.SubscriptionStore.Client\WebHook.SubscriptionStore.Client.csproj", "{28EC3118-ABAB-4766-8D12-FE0468BFA94C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebHook.SubscriptionStore.Client", "WebHook.SubscriptionStore.Client\WebHook.SubscriptionStore.Client.csproj", "{28EC3118-ABAB-4766-8D12-FE0468BFA94C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebHook.SubscriptionStore.WebApi", "WebHook.SubscriptionStore.WebApi\WebHook.SubscriptionStore.WebApi.csproj", "{9BA6A5D7-7FC7-46A7-9A25-62835AC9F92A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebHook.SubscriptionStore.WebApi", "WebHook.SubscriptionStore.WebApi\WebHook.SubscriptionStore.WebApi.csproj", "{9BA6A5D7-7FC7-46A7-9A25-62835AC9F92A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SubscriptionStore", "SubscriptionStore", "{489785E4-03C5-4100-816C-7CA751D970C6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebHook.DispatchItemStore.Client", "WebHook.DispatchItemStore.Client\WebHook.DispatchItemStore.Client.csproj", "{6EC32576-C3A1-4329-A523-CF097E71E9E3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebHook.DispatchItemStore.Client", "WebHook.DispatchItemStore.Client\WebHook.DispatchItemStore.Client.csproj", "{6EC32576-C3A1-4329-A523-CF097E71E9E3}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dispatcher", "Dispatcher", "{BEDCED38-9E49-4408-BD43-AD29D3C5E961}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DispatchItemStore", "DispatchItemStore", "{80246D97-5A80-4AFE-AF2E-54320DA6BC7B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebHook.DispatchItemStore.Client.Redis", "WebHook.DispatchItemStore.Client.Redis\WebHook.DispatchItemStore.Client.Redis.csproj", "{6795D3F9-B8B7-4D2B-9AAE-65E302ABD7AD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -53,6 +55,10 @@ Global
 		{6EC32576-C3A1-4329-A523-CF097E71E9E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6EC32576-C3A1-4329-A523-CF097E71E9E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6EC32576-C3A1-4329-A523-CF097E71E9E3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6795D3F9-B8B7-4D2B-9AAE-65E302ABD7AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6795D3F9-B8B7-4D2B-9AAE-65E302ABD7AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6795D3F9-B8B7-4D2B-9AAE-65E302ABD7AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6795D3F9-B8B7-4D2B-9AAE-65E302ABD7AD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -67,6 +73,7 @@ Global
 		{6EC32576-C3A1-4329-A523-CF097E71E9E3} = {80246D97-5A80-4AFE-AF2E-54320DA6BC7B}
 		{BEDCED38-9E49-4408-BD43-AD29D3C5E961} = {4731DDE3-47DF-4EC8-BA71-34A012C67060}
 		{80246D97-5A80-4AFE-AF2E-54320DA6BC7B} = {4731DDE3-47DF-4EC8-BA71-34A012C67060}
+		{6795D3F9-B8B7-4D2B-9AAE-65E302ABD7AD} = {80246D97-5A80-4AFE-AF2E-54320DA6BC7B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {318DA05C-C93C-41E9-BC17-9D053EFB1CC3}
