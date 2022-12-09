@@ -23,6 +23,9 @@ namespace WebHook.DispatchItemStore.Client.Redis
 
             redis = ConnectionMultiplexer.Connect(connectionString);
             dispatchListKey = new RedisKey(nameof(dispatchListKey));
+
+
+            //Does this need to be a per container list? thinking about processing this list on boot. 
             inFlightListKey = new RedisKey(nameof(inFlightListKey));
         }
         public IReadOnlyCollection<DispatchItem> GetInFlightList()
