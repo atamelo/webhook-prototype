@@ -48,16 +48,16 @@ public class DispatcherLoop
             return;
         }
 
-        await TryDispatch(@event);
+        await TryDispatch(@event.Value);
     }
 
-    private async Task TryDispatch(DispatchItem? @event)
+    private async Task TryDispatch(DispatchItem @event)
     {
         //TODO thread this thing out
         try
         {
-            await dispatcherClient.DispatchAsync(@event.Value);
-            dispatchItemStore.Remove(@event.Value);
+            await dispatcherClient.DispatchAsync(@event);
+            dispatchItemStore.Remove(@event);
         }
         catch (Exception e)
         {
