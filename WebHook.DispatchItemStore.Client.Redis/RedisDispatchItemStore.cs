@@ -13,7 +13,7 @@ namespace WebHook.DispatchItemStore.Client.Redis
         readonly RedisKey inFlightListKey;
         public RedisDispatchItemStore(string connectionString = "localhost")
         {
-            redis = ConnectionMultiplexer.Connect("localhost");
+            redis = ConnectionMultiplexer.Connect(connectionString);
             dispatchListKey = new RedisKey(nameof(dispatchListKey));
             inFlightListKey = new RedisKey(nameof(inFlightListKey));
         }
@@ -22,28 +22,21 @@ namespace WebHook.DispatchItemStore.Client.Redis
             RedisValue item = db.ListMove(dispatchListKey, inFlightListKey, ListSide.Left, ListSide.Right);
             DispatchItem returnItem = ToDispatchItem(item);
             return returnItem;
-        }
-
-       
-
+        }        
         public void PersistChanges()
         {
-            
-        }
 
+        }
         public void Put(DispatchItem item)
         {
             RedisValue redisValue = ToRedisValue(item);
             db.ListRightPush(dispatchListKey, redisValue);
         }
-
         public void Remove(DispatchItem item)
         {
             RedisValue redisValue = ToRedisValue(item);
             db.ListRemove(inFlightListKey, redisValue);
         }
-
-
         private DispatchItem ToDispatchItem(RedisValue value)
         {
             JObject obj = JObject.Parse(value.ToString());
