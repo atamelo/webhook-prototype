@@ -40,7 +40,7 @@ public class DispatcherLoop
     /// </summary>
     private async Task DispatchNextEventAsync()
     {
-        var @event = dispatchItemStore.GetNextOrDefault();
+        DispatchItem? @event = dispatchItemStore.GetNextOrDefault();
         if (@event.HasValue is false)
         {
             logger.LogInformation("No events ready for dispatch in dispatch store");
@@ -48,7 +48,6 @@ public class DispatcherLoop
             return;
         }
 
-        
         await TryDispatch(@event);
     }
 
