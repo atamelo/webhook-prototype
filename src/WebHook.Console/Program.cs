@@ -1,4 +1,5 @@
 ﻿using Confluent.Kafka;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -8,6 +9,8 @@ using WebHook.DispatchItemStore.Client;
 using WebHook.DispatchItemStore.Client.Redis;
 using WebHook.Producer.Mocks;
 using WebHook.SubscriptionStore.Client;
+using WebHook.SubscriptionStore.Client.Postgres;
+using WebHook.SubscriptionStore.Client.Postgres.Extensions;
 
 namespace WebHook.Producer;
 
@@ -25,6 +28,9 @@ internal partial class Program
                .UseConsoleLifetime()
                .Build();
 
+        //Extension
+        host.CreateDB();
+        
         await host.RunAsync();
     }
 
@@ -32,6 +38,9 @@ internal partial class Program
     {
         services.AddHostedService<DispatchItemProducerService>();
 
+        //Extension
+        services.AddSubscriptionStore();
+      
         services.AddTransient<ProducerLoop, ProducerLoopMock>(factory =>
         {
             var subscriptionStore = factory.GetService<ISubscriptionStore>()!;
@@ -43,11 +52,15 @@ internal partial class Program
             // NOTE: unobserved task!!
             Task fakeGenerator = Task.Factory.StartNew(async () =>
             {
+                Random random = new();
+                
                 while (true)
                 {
-                    fakeEventQueue.Add(new DummyEvent(DateTime.Now.ToString()));
+                    string tenantId = random.Next(1, 100).ToString();
+                    string eventId = random.Next(1, 10).ToString();
 
-                    await Task.Delay(TimeSpan.FromMilliseconds(10));
+                    fakeEventQueue.Add(new DummyEvent(tenantId, eventId, DateTime.Now.ToString()));
+                    await Task.Delay(TimeSpan.FromMilliseconds(1000));
                 }
 
             }, TaskCreationOptions.LongRunning);
@@ -55,7 +68,7 @@ internal partial class Program
             return new ProducerLoopMock(subscriptionStore, dispatchItemStore, logger, fakeEventQueue);
         });
 
-        services.AddSingleton<ISubscriptionStore, SubscriptionStoreMock>();
+        services.AddSingleton<ISubscriptionStore, PostgresSubscriptionStore>();
         services.AddSingleton<IDispatchItemStore, RedisDispatchItemStore>();
     }
 

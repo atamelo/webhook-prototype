@@ -16,6 +16,7 @@
     <ProjectReference Include="..\..\WebHook.Contracts\WebHook.Contracts.csproj" />
     <ProjectReference Include="..\..\WebHook.DispatchItemStore.Client.Redis\WebHook.DispatchItemStore.Client.Redis.csproj" />
     <ProjectReference Include="..\..\WebHook.DispatchItemStore.Client\WebHook.DispatchItemStore.Client.csproj" />
+    <ProjectReference Include="..\..\WebHook.SubscriptionStore.Client.Postgres\WebHook.SubscriptionStore.Client.Postgres.csproj" />
     <ProjectReference Include="..\..\WebHook.SubscriptionStore.Client\WebHook.SubscriptionStore.Client.csproj" />
   </ItemGroup>
 

@@ -29,7 +29,7 @@ public class DispatchItemStoreMock : IDispatchItemStore
 
     public void Put(DispatchItem item)
     {
-        this.logger.LogInformation("Dispatch item for subscriber {SubscriberID} with URL={Url} received.", item.Event.SubscriberID, item.EndpointUrl);
+        this.logger.LogInformation("Dispatch item for subscriber {TenantID} with URL={Url} received.", item.Event.TenantID, item.EndpointUrl);
     }
 
     public void Remove(DispatchItem item)

@@ -23,7 +23,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dispatcher", "Dispatcher", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DispatchItemStore", "DispatchItemStore", "{80246D97-5A80-4AFE-AF2E-54320DA6BC7B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebHook.DispatchItemStore.Client.Redis", "WebHook.DispatchItemStore.Client.Redis\WebHook.DispatchItemStore.Client.Redis.csproj", "{6795D3F9-B8B7-4D2B-9AAE-65E302ABD7AD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebHook.DispatchItemStore.Client.Redis", "WebHook.DispatchItemStore.Client.Redis\WebHook.DispatchItemStore.Client.Redis.csproj", "{6795D3F9-B8B7-4D2B-9AAE-65E302ABD7AD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker", "docker", "{76487C3D-FF96-4D92-A058-A3A0E8D827CB}"
+	ProjectSection(SolutionItems) = preProject
+		DispatcherDockerfile = DispatcherDockerfile
+		Docker\docker-compose.yml = Docker\docker-compose.yml
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebHook.SubscriptionStore.Client.Postgres", "WebHook.SubscriptionStore.Client.Postgres\WebHook.SubscriptionStore.Client.Postgres.csproj", "{8BF3AAB8-1551-4456-9AB3-291AB0211F39}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -59,6 +67,10 @@ Global
 		{6795D3F9-B8B7-4D2B-9AAE-65E302ABD7AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6795D3F9-B8B7-4D2B-9AAE-65E302ABD7AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6795D3F9-B8B7-4D2B-9AAE-65E302ABD7AD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8BF3AAB8-1551-4456-9AB3-291AB0211F39}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8BF3AAB8-1551-4456-9AB3-291AB0211F39}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8BF3AAB8-1551-4456-9AB3-291AB0211F39}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8BF3AAB8-1551-4456-9AB3-291AB0211F39}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -74,6 +86,7 @@ Global
 		{BEDCED38-9E49-4408-BD43-AD29D3C5E961} = {4731DDE3-47DF-4EC8-BA71-34A012C67060}
 		{80246D97-5A80-4AFE-AF2E-54320DA6BC7B} = {4731DDE3-47DF-4EC8-BA71-34A012C67060}
 		{6795D3F9-B8B7-4D2B-9AAE-65E302ABD7AD} = {80246D97-5A80-4AFE-AF2E-54320DA6BC7B}
+		{8BF3AAB8-1551-4456-9AB3-291AB0211F39} = {489785E4-03C5-4100-816C-7CA751D970C6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {318DA05C-C93C-41E9-BC17-9D053EFB1CC3}
