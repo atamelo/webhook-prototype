@@ -19,8 +19,13 @@ namespace WebHook.SubscriptionStore.Client.Postgres
             //TODO active filters etc
             return webhookContext.Subscriptions.Where(s=>
                 s.EventId == @event.EventID && 
-                s.TenantId == @event.TenantID)
+                s.TenantId == @event.TenantID &&
+                s.Active)
                 .Select(s=> s.Url).ToList();
+        }
+        public bool IsActive(int subscriptionId)
+        {
+            return webhookContext.Subscriptions.Find(subscriptionId)?.Active ?? false;
         }
     }
 

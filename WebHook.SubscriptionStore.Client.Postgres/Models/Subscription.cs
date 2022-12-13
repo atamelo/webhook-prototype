@@ -9,5 +9,6 @@ namespace WebHook.SubscriptionStore.Client.Postgres.Models
         public string EventId { get; set; }
         public string TenantId { get; set; }
         public string Url { get; set; }
+        public bool Active { get; set; }
     }
 }
