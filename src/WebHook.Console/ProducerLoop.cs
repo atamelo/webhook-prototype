@@ -58,9 +58,6 @@ public class ProducerLoop
                 // number_of_nodes * (batchSize - 1) items.
                 if (batchSizeReached)
                 {
-                    // NOTE: first get a successful "commit" from the dispatch store
-                    dispatchItemStore.PersistChanges();
-
                     // NOTE: an only then do a commit at the source
                     eventLogConsumer.Commit(record);
                 }

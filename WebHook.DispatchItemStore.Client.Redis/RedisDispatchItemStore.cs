@@ -49,10 +49,6 @@ namespace WebHook.DispatchItemStore.Client.Redis
 
             return returnItem;
         }
-        public void PersistChanges()
-        {
-
-        }
         public void Put(DispatchItem item)
         {
             RedisValue redisValue = ToRedisValue(item);

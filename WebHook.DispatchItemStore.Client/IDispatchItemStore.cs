@@ -12,6 +12,5 @@ public interface IDispatchItemStore
 
     DispatchItem? GetNextOrDefault();
 
-    void PersistChanges();
     IReadOnlyCollection<DispatchItem> GetInFlightList();
 }
