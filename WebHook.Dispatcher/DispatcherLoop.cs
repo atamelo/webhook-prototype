@@ -8,6 +8,8 @@ public class DispatcherLoop
     private readonly IDispatcherClient dispatcherClient;
     private readonly ILogger<DispatcherLoop> logger;
     private readonly ConcurrentQueue<DispatchItem> queueEvents;
+
+    //TODO fill from config
     private readonly int windowSize = 100;
     public DispatcherLoop(
         IDispatchItemStore dispatchItemStore,
@@ -22,17 +24,22 @@ public class DispatcherLoop
     public async Task Start(CancellationToken cancellationToken)
     {
         Task.Factory.StartNew(() => RunDispatcher(cancellationToken), TaskCreationOptions.LongRunning);
-        await PreviousSessionCleanupAsync();
+        PreviousSessionCleanup();
+        await StartEnqueueServiceAsync(cancellationToken);
+    }
+
+    private async Task StartEnqueueServiceAsync(CancellationToken cancellationToken)
+    {
         while (cancellationToken.IsCancellationRequested is false)
         {
-            await DispatchNextEventAsync();
+            await EnqueueNextEventsAsync();
         }
     }
 
     /// <summary>
     /// Reprocess evertyhing that was inflight incase this container is booting up from a failure
     /// </summary>
-    private async Task PreviousSessionCleanupAsync()
+    private void PreviousSessionCleanup()
     {
         foreach (DispatchItem @event in dispatchItemStore.GetInFlightList())
         {
@@ -41,9 +48,11 @@ public class DispatcherLoop
     }
 
     /// <summary>
-    /// Process next event in the queue
+    /// Keep the window queue full for dispatch
+    /// At max capacity the system will have window size events in progress and 
+    /// the queue will be holding window size events ready for dispatch
     /// </summary>
-    private async Task DispatchNextEventAsync()
+    private async Task EnqueueNextEventsAsync()
     {
         if (queueEvents.Count < windowSize)
         {
@@ -88,7 +97,6 @@ public class DispatcherLoop
 
     private async Task TryDispatch(DispatchItem @event)
     {
-        //TODO thread this thing out
         try
         {
             await dispatcherClient.DispatchAsync(@event);
