@@ -13,7 +13,7 @@ namespace WebHook.DispatchItemStore.Client.Redis
         readonly RedisKey dispatchListKey;
         readonly RedisKey inFlightListKey;
         Dictionary<Guid, RedisValue> inFlightItems = new();
-        public RedisDispatchItemStore(string connectionString = "localhost")
+        public RedisDispatchItemStore(string connectionString = "localhost", string nodeId = "")
         {
             //TODO FIX
             //Hack until I get env variables and config for docker setup
@@ -22,10 +22,8 @@ namespace WebHook.DispatchItemStore.Client.Redis
             #endif
 
             redis = ConnectionMultiplexer.Connect(connectionString);
-            dispatchListKey = new RedisKey(nameof(dispatchListKey));
+            dispatchListKey = new RedisKey(nameof(dispatchListKey)+nodeId);
 
-
-            //Does this need to be a per container list? thinking about processing this list on boot. 
             inFlightListKey = new RedisKey(nameof(inFlightListKey));
         }
         public IReadOnlyCollection<DispatchItem> GetInFlightList()
@@ -81,7 +79,6 @@ namespace WebHook.DispatchItemStore.Client.Redis
             JObject jObject = JObject.FromObject(item);
             RedisValue redisValue = new(jObject.ToString());
             return redisValue;
-
         }
     }
 }

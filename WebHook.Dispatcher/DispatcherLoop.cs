@@ -1,26 +1,31 @@
 ﻿using Microsoft.Extensions.Logging;
+using System.Collections.Concurrent;
+using WebHook.Contracts.Events;
 using WebHook.DispatchItemStore.Client;
 public class DispatcherLoop
 {
     private readonly IDispatchItemStore dispatchItemStore;
     private readonly IDispatcherClient dispatcherClient;
     private readonly ILogger<DispatcherLoop> logger;
-
+    private readonly ConcurrentQueue<DispatchItem> queueEvents;
+    private readonly int windowSize = 100;
     public DispatcherLoop(
-        IDispatchItemStore dispatchItemStore, 
-        IDispatcherClient dispatcherClient, 
+        IDispatchItemStore dispatchItemStore,
+        IDispatcherClient dispatcherClient,
         ILogger<DispatcherLoop> logger)
     {
         this.dispatchItemStore = dispatchItemStore;
         this.dispatcherClient = dispatcherClient;
         this.logger = logger;
+        queueEvents = new();
     }
-    public async Task Start(CancellationToken cancellationToken) 
+    public async Task Start(CancellationToken cancellationToken)
     {
+        Task.Factory.StartNew(() => RunDispatcher(cancellationToken), TaskCreationOptions.LongRunning);
         await PreviousSessionCleanupAsync();
         while (cancellationToken.IsCancellationRequested is false)
         {
-          await DispatchNextEventAsync();
+            await DispatchNextEventAsync();
         }
     }
 
@@ -31,7 +36,7 @@ public class DispatcherLoop
     {
         foreach (DispatchItem @event in dispatchItemStore.GetInFlightList())
         {
-            await TryDispatch(@event);
+            queueEvents.Enqueue(@event);
         }
     }
 
@@ -40,15 +45,45 @@ public class DispatcherLoop
     /// </summary>
     private async Task DispatchNextEventAsync()
     {
-        DispatchItem? @event = dispatchItemStore.GetNextOrDefault();
-        if (@event.HasValue is false)
+        if (queueEvents.Count < windowSize)
         {
-            logger.LogInformation("No events ready for dispatch in dispatch store");
-            await Task.Delay(1000);
-            return;
+            DispatchItem? @event = dispatchItemStore.GetNextOrDefault();
+            if (@event.HasValue is false)
+            {
+                logger.LogInformation("No events ready for dispatch in dispatch store");
+                await Task.Delay(1000);
+                return;
+            }
+            queueEvents.Enqueue(@event.Value);
+        }
+    }
+    private Task RunDispatcher(CancellationToken cancellationToken)
+    {
+        var tasks = new List<Task>();
+        while (cancellationToken.IsCancellationRequested is false)
+        {
+            WindowFill();
+            while (tasks.Any())
+            {
+                int finished = Task.WaitAny(tasks.ToArray());
+                tasks.RemoveAt(finished);
+                WindowFill();
+            }
         }
 
-        await TryDispatch(@event.Value);
+        //Top off sliding window
+        void WindowFill()
+        {
+            while (queueEvents.Any() && tasks.Count() < windowSize)
+            {
+                if (queueEvents.TryDequeue(out DispatchItem @event))
+                {
+                    var result = TryDispatch(@event);
+                    tasks.Add(result);
+                }
+            }
+        }
+        return Task.CompletedTask;
     }
 
     private async Task TryDispatch(DispatchItem @event)

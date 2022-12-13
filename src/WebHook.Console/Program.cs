@@ -47,7 +47,7 @@ internal partial class Program
                 {
                     fakeEventQueue.Add(new DummyEvent(DateTime.Now.ToString()));
 
-                    await Task.Delay(TimeSpan.FromSeconds(1));
+                    await Task.Delay(TimeSpan.FromMilliseconds(10));
                 }
 
             }, TaskCreationOptions.LongRunning);
