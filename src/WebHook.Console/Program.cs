@@ -60,7 +60,7 @@ internal partial class Program
                     string eventId = random.Next(1, 10).ToString();
 
                     fakeEventQueue.Add(new DummyEvent(tenantId, eventId, DateTime.Now.ToString()));
-                    await Task.Delay(TimeSpan.FromMilliseconds(1000));
+                    await Task.Delay(TimeSpan.FromMilliseconds(10));
                 }
 
             }, TaskCreationOptions.LongRunning);

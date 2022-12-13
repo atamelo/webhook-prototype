@@ -1,5 +1,8 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
+using MiNET.Utils.Collections;
 using System.Collections.Concurrent;
+using System.Timers;
 using WebHook.Contracts.Events;
 using WebHook.DispatchItemStore.Client;
 public class DispatcherLoop
@@ -8,7 +11,7 @@ public class DispatcherLoop
     private readonly IDispatcherClient dispatcherClient;
     private readonly ILogger<DispatcherLoop> logger;
     private readonly ConcurrentQueue<DispatchItem> queueEvents;
-
+    private readonly MemoryCache memoryCache;
     //TODO fill from config
     private readonly int windowSize = 100;
     public DispatcherLoop(
@@ -68,7 +71,7 @@ public class DispatcherLoop
     }
     private Task RunDispatcher(CancellationToken cancellationToken)
     {
-        var tasks = new List<Task>();
+        List<Task> tasks = new();
         while (cancellationToken.IsCancellationRequested is false)
         {
             WindowFill();
@@ -104,7 +107,22 @@ public class DispatcherLoop
         }
         catch (Exception e)
         {
+            
+            TimeSpan retryDelay = TimeSpan.FromMinutes(1);
+
+            //TODO update db that we have failed and are going to retry
+
+            TimedEnqueue(@event, retryDelay);
             logger.LogError(e.Message, e);
         }
     }
+    private void TimedEnqueue(DispatchItem @event, TimeSpan duration)
+    {
+        Task.Factory.StartNew(async () =>
+        {
+            await Task.Delay(duration);
+            queueEvents.Enqueue(@event);
+        });
+    }
+
 }
