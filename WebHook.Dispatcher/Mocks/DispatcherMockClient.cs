@@ -4,6 +4,7 @@ public class DispatcherMockClient : IDispatcherClient
 {
     public async Task DispatchAsync(DispatchItem item)
     {
+        item.DispatchCount++;
         int min = 1000;
         int max = 7000;
         Random rand = new();

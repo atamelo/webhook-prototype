@@ -11,7 +11,7 @@ public class DispatcherLoop
     private readonly IDispatcherClient dispatcherClient;
     private readonly ILogger<DispatcherLoop> logger;
     private readonly ConcurrentQueue<DispatchItem> queueEvents;
-    private readonly MemoryCache memoryCache;
+    private readonly ConcurrentDictionary<int, int> retryCount;
     //TODO fill from config
     private readonly int windowSize = 100;
     public DispatcherLoop(
@@ -23,6 +23,7 @@ public class DispatcherLoop
         this.dispatcherClient = dispatcherClient;
         this.logger = logger;
         queueEvents = new();
+        retryCount = new();
     }
     public async Task Start(CancellationToken cancellationToken)
     {
@@ -60,13 +61,13 @@ public class DispatcherLoop
         if (queueEvents.Count < windowSize)
         {
             DispatchItem? @event = dispatchItemStore.GetNextOrDefault();
-            if (@event.HasValue is false)
+            if (@event is null)
             {
                 logger.LogInformation("No events ready for dispatch in dispatch store");
                 await Task.Delay(1000);
                 return;
             }
-            queueEvents.Enqueue(@event.Value);
+            queueEvents.Enqueue(@event);
         }
     }
     private Task RunDispatcher(CancellationToken cancellationToken)
@@ -107,20 +108,23 @@ public class DispatcherLoop
         }
         catch (Exception e)
         {
-            
-            TimeSpan retryDelay = TimeSpan.FromMinutes(1);
-
-            //TODO update db that we have failed and are going to retry
-
-            TimedEnqueue(@event, retryDelay);
+            ProcessFailure(@event);
             logger.LogError(e.Message, e);
         }
     }
-    private void TimedEnqueue(DispatchItem @event, TimeSpan duration)
+    private void ProcessFailure(DispatchItem @event)
     {
+        if (@event.DispatchCount >= 3)
+        {
+            //TODO pause sub via dbcontext
+
+            dispatchItemStore.Remove(@event);
+            return;
+        }
+        TimeSpan retryDelay = TimeSpan.FromMinutes(@event.DispatchCount);
         Task.Factory.StartNew(async () =>
         {
-            await Task.Delay(duration);
+            await Task.Delay(retryDelay);
             queueEvents.Enqueue(@event);
         });
     }

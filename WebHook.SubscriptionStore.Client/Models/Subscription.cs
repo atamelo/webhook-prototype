@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace WebHook.SubscriptionStore.Client.Postgres.Models
+namespace WebHook.SubscriptionStore.Client.Models
 {
     public class Subscription
     {

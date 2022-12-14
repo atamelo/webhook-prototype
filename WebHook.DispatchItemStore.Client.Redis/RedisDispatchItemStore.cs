@@ -58,6 +58,7 @@ namespace WebHook.DispatchItemStore.Client.Redis
             if (inFlightItems.ContainsKey(item.Id))
             {
                 db.ListRemove(inFlightListKey, inFlightItems[item.Id]);
+                inFlightItems.Remove(item.Id);
             }
 
         }

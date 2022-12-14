@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using WebHook.Contracts.Events;
 using WebHook.DispatchItemStore.Client;
 using WebHook.SubscriptionStore.Client;
+using WebHook.SubscriptionStore.Client.Models;
 
 namespace WebHook.Producer;
 
@@ -40,11 +41,11 @@ public class ProducerLoop
 
                 // TODO: add extensive logging
 
-                IReadOnlyList<string> urls = subscriptionStore.GetEndpointsFor(record.Message.Value, stopSignal);
+                IReadOnlyList<Subscription> subscriptions = subscriptionStore.GetSubscriptionsFor(record.Message.Value, stopSignal);
 
-                foreach (string url in urls)
+                foreach (Subscription subscription in subscriptions)
                 {
-                    DispatchItem item = new(Guid.NewGuid(), url, record.Message.Value);
+                    DispatchItem item = new(Guid.NewGuid(), subscription, record.Message.Value);
                     dispatchItemStore.Put(item);
                 }
 
