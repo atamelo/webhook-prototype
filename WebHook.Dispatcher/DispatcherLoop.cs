@@ -10,8 +10,7 @@ public class DispatcherLoop
     private readonly IDispatchItemStore dispatchItemStore;
     private readonly IDispatcherClient dispatcherClient;
     private readonly ILogger<DispatcherLoop> logger;
-    private readonly ConcurrentQueue<DispatchItem> queueEvents;
-    private readonly ConcurrentDictionary<int, int> retryCount;
+
     //TODO fill from config
     private readonly int windowSize = 100;
     public DispatcherLoop(
@@ -22,81 +21,46 @@ public class DispatcherLoop
         this.dispatchItemStore = dispatchItemStore;
         this.dispatcherClient = dispatcherClient;
         this.logger = logger;
-        queueEvents = new();
-        retryCount = new();
     }
     public async Task Start(CancellationToken cancellationToken)
     {
-        Task.Factory.StartNew(() => RunDispatcher(cancellationToken), TaskCreationOptions.LongRunning);
-        PreviousSessionCleanup();
-        await StartEnqueueServiceAsync(cancellationToken);
+        await RunDispatcher(cancellationToken);
     }
 
-    private async Task StartEnqueueServiceAsync(CancellationToken cancellationToken)
-    {
-        while (cancellationToken.IsCancellationRequested is false)
-        {
-            await EnqueueNextEventsAsync();
-        }
-    }
-
-    /// <summary>
-    /// Reprocess evertyhing that was inflight incase this container is booting up from a failure
-    /// </summary>
-    private void PreviousSessionCleanup()
-    {
-        foreach (DispatchItem @event in dispatchItemStore.GetInFlightList())
-        {
-            queueEvents.Enqueue(@event);
-        }
-    }
-
-    /// <summary>
-    /// Keep the window queue full for dispatch
-    /// At max capacity the system will have window size events in progress and 
-    /// the queue will be holding window size events ready for dispatch
-    /// </summary>
-    private async Task EnqueueNextEventsAsync()
-    {
-        if (queueEvents.Count < windowSize)
-        {
-            DispatchItem? @event = dispatchItemStore.GetNextOrDefault();
-            if (@event is null)
-            {
-                logger.LogInformation("No events ready for dispatch in dispatch store");
-                await Task.Delay(1000);
-                return;
-            }
-            queueEvents.Enqueue(@event);
-        }
-    }
-    private Task RunDispatcher(CancellationToken cancellationToken)
+    
+    private async Task RunDispatcher(CancellationToken cancellationToken)
     {
         List<Task> tasks = new();
         while (cancellationToken.IsCancellationRequested is false)
         {
-            WindowFill();
+            await WindowFillAsync();
             while (tasks.Any())
             {
                 int finished = Task.WaitAny(tasks.ToArray());
                 tasks.RemoveAt(finished);
-                WindowFill();
+                await WindowFillAsync();
             }
         }
 
         //Top off sliding window
-        void WindowFill()
+        async Task WindowFillAsync()
         {
-            while (queueEvents.Any() && tasks.Count() < windowSize)
+            while (tasks.Count() < windowSize)
             {
-                if (queueEvents.TryDequeue(out DispatchItem @event))
+                DispatchItem? item  = dispatchItemStore.GetNextOrDefault();
+                if (item is not null)
                 {
-                    var result = TryDispatch(@event);
+                    var result = TryDispatch(item);
                     tasks.Add(result);
+                }
+                else
+                {
+                    await Task.Delay(100);
+                    break;
                 }
             }
         }
-        return Task.CompletedTask;
+        return;
     }
 
     private async Task TryDispatch(DispatchItem @event)
@@ -117,16 +81,12 @@ public class DispatcherLoop
         if (@event.DispatchCount >= 3)
         {
             //TODO pause sub via dbcontext
-
             dispatchItemStore.Remove(@event);
             return;
         }
-        TimeSpan retryDelay = TimeSpan.FromMinutes(@event.DispatchCount);
-        Task.Factory.StartNew(async () =>
-        {
-            await Task.Delay(retryDelay);
-            queueEvents.Enqueue(@event);
-        });
+
+        TimeSpan retryDelay = TimeSpan.FromMinutes(1);
+        dispatchItemStore.DelayRequeue(@event,retryDelay);
     }
 
 }

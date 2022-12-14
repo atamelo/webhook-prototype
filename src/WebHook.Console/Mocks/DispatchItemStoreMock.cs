@@ -13,7 +13,7 @@ public class DispatchItemStoreMock : IDispatchItemStore
         this.logger = logger;
     }
 
-    public IReadOnlyCollection<DispatchItem> GetInFlightList()
+    public void DelayRequeue(DispatchItem item, TimeSpan delay)
     {
         throw new NotImplementedException();
     }
@@ -23,9 +23,6 @@ public class DispatchItemStoreMock : IDispatchItemStore
         throw new NotImplementedException();
     }
 
-    public void PersistChanges()
-    {
-    }
 
     public void Put(DispatchItem item)
     {
@@ -34,5 +31,6 @@ public class DispatchItemStoreMock : IDispatchItemStore
 
     public void Remove(DispatchItem item)
     {
+        throw new NotImplementedException();
     }
 }

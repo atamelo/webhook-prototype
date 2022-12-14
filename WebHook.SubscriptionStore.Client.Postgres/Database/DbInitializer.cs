@@ -17,6 +17,7 @@ namespace WebHook.SubscriptionStore.Client.Postgres.Database
                 subscription.Id = i;
                 subscription.EventId = random.Next(1, 10).ToString();
                 subscription.TenantId = random.Next(1, 100).ToString();
+                subscription.Active = true;
                 subscription.Url = "http://localhost:5678/webhook";
 
                 context.Subscriptions.Add(subscription);

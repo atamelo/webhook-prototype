@@ -13,6 +13,7 @@ namespace WebHook.DispatchItemStore.Client.Redis
         readonly RedisKey dispatchListKey;
         readonly RedisKey inFlightListKey;
         Dictionary<Guid, RedisValue> inFlightItems = new();
+        Queue<DispatchItem> retryQueue = new Queue<DispatchItem>();
         public RedisDispatchItemStore(string connectionString = "localhost", string nodeId = "localnode")
         {
             //TODO FIX
@@ -24,8 +25,9 @@ namespace WebHook.DispatchItemStore.Client.Redis
             redis = ConnectionMultiplexer.Connect(connectionString);
             dispatchListKey = new RedisKey(nameof(dispatchListKey));
             inFlightListKey = new RedisKey(nameof(inFlightListKey) + nodeId);
+            retryQueue = new Queue<DispatchItem>(GetInFlightList());
         }
-        public IReadOnlyCollection<DispatchItem> GetInFlightList()
+        private IReadOnlyCollection<DispatchItem> GetInFlightList()
         {
 
              return db.ListRange(inFlightListKey).Select(rv =>
@@ -36,8 +38,21 @@ namespace WebHook.DispatchItemStore.Client.Redis
              }).ToList();
 
         }
+        public void DelayRequeue(DispatchItem item, TimeSpan delay)
+        {
+            Task.Factory.StartNew(async () =>
+            {
+                await Task.Delay(delay);
+                retryQueue.Enqueue(item);
+            });
+        }
         public DispatchItem? GetNextOrDefault()
         {
+            if (retryQueue.Any())
+            {
+                return retryQueue.Dequeue();
+            }
+
             RedisValue item = db.ListMove(dispatchListKey, inFlightListKey, ListSide.Left, ListSide.Right);
 
             if (item.HasValue is false)

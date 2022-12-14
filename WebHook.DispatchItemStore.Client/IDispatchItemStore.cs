@@ -26,6 +26,5 @@ public interface IDispatchItemStore
     void Remove(DispatchItem item);
 
     DispatchItem? GetNextOrDefault();
-
-    IReadOnlyCollection<DispatchItem> GetInFlightList();
+    void DelayRequeue(DispatchItem item, TimeSpan delay);
 }
