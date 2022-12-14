@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
@@ -7,12 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Azure.Storage.Queues" Version="12.12.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\WebHook.Contracts\WebHook.Contracts.csproj" />
-    <ProjectReference Include="..\WebHook.SubscriptionStore.Client.Postgres\WebHook.SubscriptionStore.Client.Postgres.csproj" />
+    <ProjectReference Include="..\WebHook.DispatchItemStore.Client\WebHook.DispatchItemStore.Client.csproj" />
   </ItemGroup>
 
 </Project>

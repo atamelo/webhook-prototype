@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using WebHook.Contracts.Events;
 using WebHook.DispatchItemStore.Client;
+using WebHook.DispatchItemStore.Client.AzureQueueStorage;
 using WebHook.DispatchItemStore.Client.Redis;
 using WebHook.Producer.Mocks;
 using WebHook.SubscriptionStore.Client;
@@ -69,7 +70,7 @@ internal partial class Program
         });
 
         services.AddSingleton<ISubscriptionStore, PostgresSubscriptionStore>();
-        services.AddSingleton<IDispatchItemStore, RedisDispatchItemStore>();
+        services.AddSingleton<IDispatchItemStore, AzureDispatchItemStore>();
     }
 
     

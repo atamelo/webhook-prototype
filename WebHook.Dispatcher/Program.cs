@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using WebHook.DispatchItemStore.Client;
+using WebHook.DispatchItemStore.Client.AzureQueueStorage;
 using WebHook.DispatchItemStore.Client.Redis;
 
 internal class Program
@@ -25,6 +26,6 @@ internal class Program
         services.AddHostedService<DispatcherService>();
         services.AddSingleton<DispatcherLoop>();
         services.AddSingleton<IDispatcherClient, DispatcherMockClient>();
-        services.AddSingleton<IDispatchItemStore, RedisDispatchItemStore>();
+        services.AddSingleton<IDispatchItemStore, AzureDispatchItemStore>();
     }
 }

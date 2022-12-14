@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\WebHook.DispatchItemStore.Client.AzureQueueStorage\WebHook.DispatchItemStore.Client.AzureQueueStorage.csproj" />
     <ProjectReference Include="..\WebHook.DispatchItemStore.Client.Redis\WebHook.DispatchItemStore.Client.Redis.csproj" />
   </ItemGroup>
 
