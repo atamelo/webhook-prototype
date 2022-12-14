@@ -11,29 +11,28 @@ namespace WebHook.DispatchItemStore.Client.Redis
         IDatabase db => redis.GetDatabase();
 
         readonly RedisKey dispatchListKey;
-        readonly RedisKey inFlightListKey;
-        Dictionary<Guid, RedisValue> inFlightItems = new();
+        readonly RedisKey inProgressListKey;
+        Dictionary<Guid, RedisValue> inProgressItems = new();
         Queue<DispatchItem> retryQueue = new Queue<DispatchItem>();
         public RedisDispatchItemStore(string connectionString = "localhost", string nodeId = "localnode")
         {
-            //TODO FIX
-            //Hack until I get env variables and config for docker setup
+            //TODO HACKY DOCKER FIX
             #if !DEBUG
                 connectionString = "redis:6379";
             #endif
 
             redis = ConnectionMultiplexer.Connect(connectionString);
             dispatchListKey = new RedisKey(nameof(dispatchListKey));
-            inFlightListKey = new RedisKey(nameof(inFlightListKey) + nodeId);
-            retryQueue = new Queue<DispatchItem>(GetInFlightList());
+            inProgressListKey = new RedisKey(nameof(inProgressListKey) + nodeId);
+            retryQueue = new Queue<DispatchItem>(GetInProgressList());
         }
-        private IReadOnlyCollection<DispatchItem> GetInFlightList()
+        private IReadOnlyCollection<DispatchItem> GetInProgressList()
         {
 
-             return db.ListRange(inFlightListKey).Select(rv =>
+             return db.ListRange(inProgressListKey).Select(rv =>
              {
                  DispatchItem returnItem = ToDispatchItem(rv);
-                 inFlightItems.Add(returnItem.Id, rv);
+                 inProgressItems.Add(returnItem.Id, rv);
                  return returnItem;
              }).ToList();
 
@@ -53,13 +52,13 @@ namespace WebHook.DispatchItemStore.Client.Redis
                 return retryQueue.Dequeue();
             }
 
-            RedisValue item = db.ListMove(dispatchListKey, inFlightListKey, ListSide.Left, ListSide.Right);
+            RedisValue item = db.ListMove(dispatchListKey, inProgressListKey, ListSide.Left, ListSide.Right);
 
             if (item.HasValue is false)
                 return null;
 
             DispatchItem returnItem = ToDispatchItem(item);
-            inFlightItems.Add(returnItem.Id, item);
+            inProgressItems.Add(returnItem.Id, item);
 
             return returnItem;
         }
@@ -70,10 +69,10 @@ namespace WebHook.DispatchItemStore.Client.Redis
         }
         public void Remove(DispatchItem item)
         {
-            if (inFlightItems.ContainsKey(item.Id))
+            if (inProgressItems.ContainsKey(item.Id))
             {
-                db.ListRemove(inFlightListKey, inFlightItems[item.Id]);
-                inFlightItems.Remove(item.Id);
+                db.ListRemove(inProgressListKey, inProgressItems[item.Id]);
+                inProgressItems.Remove(item.Id);
             }
 
         }
