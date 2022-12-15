@@ -68,8 +68,10 @@ public class DispatcherLoop
 
     private DispatchItem GetNextItem()
     {
+        int FetchAttempt = 0;
         while (bufferedItems.Count == 0)
         {
+            FetchAttempt++;
             IReadOnlyList<DispatchItem> newItems = dispatchItemStore.GetNext(32);
             if (newItems.Count > 0)
             {
@@ -80,9 +82,15 @@ public class DispatcherLoop
             }
             else
             {
-                //TODO configurable and maybe dynaic?
-                //No items in store, wait and try again
-                Thread.Sleep(100);
+
+                //TODO configurable, caps, amounts figure it out
+
+                TimeSpan delay = TimeSpan.FromSeconds(1) * FetchAttempt;
+                if(delay > TimeSpan.FromMinutes(5))
+                {
+                    delay = TimeSpan.FromMinutes(5);
+                }
+                Thread.Sleep(delay);
             }
         }
 
