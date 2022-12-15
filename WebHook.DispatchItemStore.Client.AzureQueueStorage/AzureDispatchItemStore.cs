@@ -80,7 +80,6 @@ namespace WebHook.DispatchItemStore.Client.AzureQueueStorage
 
             //TODO manage responses / errors
             queue.DeleteMessage(message.MessageId, message.PopReceipt);
-            bool removed = false;
             inProgressMessages.TryRemove(new KeyValuePair<Guid, QueueMessage>(item.Id, message));
 
         }

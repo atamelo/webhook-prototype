@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using WebHook.Contracts.Events;
 
+//TODO config
 var config = new ProducerConfig { BootstrapServers = "localhost:9092" };
 
 // If serializers are not specified, default serializers from
