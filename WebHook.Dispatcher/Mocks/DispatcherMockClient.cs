@@ -13,7 +13,7 @@ public class DispatcherMockClient : IDispatcherClient
 
 
         int failed = rand.Next(100);
-        if (failed < 5)
+        if (failed < 2)
         {
             throw new Exception("POST FAILED FOR A RANDOM REASON");
         }

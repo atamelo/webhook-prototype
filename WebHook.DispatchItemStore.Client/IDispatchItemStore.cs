@@ -27,4 +27,5 @@ public interface IDispatchItemStore
 
     DispatchItem? GetNextOrDefault();
     void DelayRequeue(DispatchItem item, TimeSpan delay);
+    IReadOnlyList<DispatchItem> GetNext(int count);
 }

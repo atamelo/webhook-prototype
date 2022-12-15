@@ -21,13 +21,13 @@ public class DispatcherService : IHostedService
     {
         this.logger.LogInformation("Starting the service...");
 
-        this.dispatcherLoopTask = Task.Factory.StartNew(() =>
+        this.dispatcherLoopTask = Task.Factory.StartNew(async () =>
         {
             // NOTE: when directly implementing IHostedService exceptions like this won't surface
             // until the stop (Ctrl-C) the service
             // Consider inheriting from BackgroundService instead
             //throw null;
-            this.dispatcherLoop.Start(this.cancellation.Token);
+            await this.dispatcherLoop.Start(this.cancellation.Token);
         }, TaskCreationOptions.LongRunning);
 
         return Task.CompletedTask;

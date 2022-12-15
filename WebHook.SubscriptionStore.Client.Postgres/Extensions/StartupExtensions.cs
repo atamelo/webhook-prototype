@@ -11,7 +11,10 @@ namespace WebHook.SubscriptionStore.Client.Postgres.Extensions
         {
             //TODO add configuration
             services.AddDbContext<WebhookContext>(options =>
-                options.UseNpgsql("Host=localhost:5432;Database=webhooks;Username=postgres;Password=postgres"));
+            {
+                options.UseNpgsql("Host=localhost:5432;Database=webhooks;Username=postgres;Password=postgres");
+                options.EnableSensitiveDataLogging(false);
+            });
 
 
         }

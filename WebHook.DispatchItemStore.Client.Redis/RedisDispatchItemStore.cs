@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using StackExchange.Redis;
+using System.Collections.Generic;
 using System.Runtime.InteropServices.JavaScript;
 
 namespace WebHook.DispatchItemStore.Client.Redis
@@ -44,6 +45,19 @@ namespace WebHook.DispatchItemStore.Client.Redis
                 await Task.Delay(delay);
                 retryQueue.Enqueue(item);
             });
+        }
+        public IReadOnlyList<DispatchItem> GetNext(int count)
+        {
+            List<DispatchItem> items = new();
+            for (int i = 0; i < count; i++)
+            {
+                DispatchItem? item = GetNextOrDefault();
+                
+                if (item is null) return items;
+
+                items.Add(item);
+            }
+            return items;
         }
         public DispatchItem? GetNextOrDefault()
         {

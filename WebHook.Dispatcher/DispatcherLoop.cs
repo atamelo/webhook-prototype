@@ -12,7 +12,7 @@ public class DispatcherLoop
     private readonly ILogger<DispatcherLoop> logger;
 
     //TODO fill from config
-    private readonly int windowSize = 100;
+    private readonly int windowSize = 1000;
     public DispatcherLoop(
         IDispatchItemStore dispatchItemStore,
         IDispatcherClient dispatcherClient,
@@ -24,56 +24,63 @@ public class DispatcherLoop
     }
     public async Task Start(CancellationToken cancellationToken)
     {
-        await RunDispatcher(cancellationToken);
+        try
+        {
+            await RunDispatcher(cancellationToken);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Dispatcher loop critical failure");
+            throw;
+        }
+
     }
 
-    
+
     private async Task RunDispatcher(CancellationToken cancellationToken)
     {
         List<Task> tasks = new();
         while (cancellationToken.IsCancellationRequested is false)
         {
-            await WindowFillAsync();
-            while (tasks.Any())
-            {
-                int finished = Task.WaitAny(tasks.ToArray());
-                tasks.RemoveAt(finished);
-                await WindowFillAsync();
-            }
+            WindowFill();
+            tasks.RemoveAll(t => t.IsCompleted);
         }
 
         //Top off sliding window
-        async Task WindowFillAsync()
+        void WindowFill()
         {
             while (tasks.Count() < windowSize)
             {
-                DispatchItem? item  = dispatchItemStore.GetNextOrDefault();
-                if (item is not null)
-                {
-                    var result = TryDispatch(item);
-                    tasks.Add(result);
+                IReadOnlyList<DispatchItem> items = dispatchItemStore.GetNext(windowSize - tasks.Count());
+                if (items.Any() is false) 
+                { 
+                    Thread.Sleep(100); 
                 }
-                else
-                {
-                    await Task.Delay(100);
-                    break;
-                }
+                IEnumerable<Task> newTasks = items.Select(item => TryDispatch(item));
+                tasks.AddRange(newTasks);
             }
         }
         return;
     }
 
+    int dispatchCount = 0;
     private async Task TryDispatch(DispatchItem @event)
     {
         try
         {
             await dispatcherClient.DispatchAsync(@event);
             dispatchItemStore.Remove(@event);
+            dispatchCount++;
+            if (dispatchCount % 100 == 0)
+            {
+                logger.LogInformation($"Success Dispatch Count: {dispatchCount}");
+            }
+
         }
         catch (Exception e)
         {
             ProcessFailure(@event);
-            logger.LogError(e.Message, e);
+            //logger.LogError(e.Message, e);
         }
     }
     private void ProcessFailure(DispatchItem @event)
@@ -86,7 +93,7 @@ public class DispatcherLoop
         }
 
         TimeSpan retryDelay = TimeSpan.FromMinutes(1);
-        dispatchItemStore.DelayRequeue(@event,retryDelay);
+        dispatchItemStore.DelayRequeue(@event, retryDelay);
     }
 
 }

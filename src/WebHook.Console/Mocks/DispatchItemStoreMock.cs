@@ -18,11 +18,20 @@ public class DispatchItemStoreMock : IDispatchItemStore
         throw new NotImplementedException();
     }
 
+    public IReadOnlyList<DispatchItem> GetNext(int count)
+    {
+        throw new NotImplementedException();
+    }
+
     public DispatchItem? GetNextOrDefault()
     {
         throw new NotImplementedException();
     }
 
+    public DispatchItem? GetNextOrDefault(int count)
+    {
+        throw new NotImplementedException();
+    }
 
     public void Put(DispatchItem item)
     {

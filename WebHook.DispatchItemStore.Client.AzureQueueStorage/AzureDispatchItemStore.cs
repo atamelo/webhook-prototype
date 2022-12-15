@@ -5,13 +5,14 @@ using System.Text;
 using System;
 using WebHook.DispatchItemStore.Client.Redis;
 using Newtonsoft.Json;
+using System.Collections.Concurrent;
 
 namespace WebHook.DispatchItemStore.Client.AzureQueueStorage
 {
     public class AzureDispatchItemStore : IDispatchItemStore
     {
         QueueClient queue;
-        Dictionary<Guid, QueueMessage> inProgressMessages = new();
+        ConcurrentDictionary<Guid, QueueMessage> inProgressMessages = new();
         public AzureDispatchItemStore()
         {
             //TODO Config
@@ -27,18 +28,46 @@ namespace WebHook.DispatchItemStore.Client.AzureQueueStorage
             queue.UpdateMessage(message.MessageId, message.PopReceipt, message.Body, delay);
         }
 
+        public IReadOnlyList<DispatchItem> GetNext(int maxMessages)
+        {
+            if(maxMessages>32) maxMessages= 32;
+
+            QueueMessage[] message = queue.ReceiveMessages(maxMessages: maxMessages, TimeSpan.FromSeconds(30));
+
+            if (message is null) return new List<DispatchItem>();
+
+            return message.Select(m => ConvertToDispatchItem(m)).ToList();
+        }
+
         public DispatchItem? GetNextOrDefault()
         {
             QueueMessage message = queue.ReceiveMessage(TimeSpan.FromSeconds(30));
-            
+
             if (message is null) return null;
 
+            DispatchItem returnItem = ConvertToDispatchItem(message);
+
+            return returnItem;
+        }
+
+        private DispatchItem ConvertToDispatchItem(QueueMessage message)
+        {
             string stringData = message.Body.ToString();
             JObject obj = JObject.Parse(stringData);
             var jsonSerializer = new JsonSerializer();
             jsonSerializer.Converters.Add(new EventConverter());
             DispatchItem returnItem = obj.ToObject<DispatchItem>(jsonSerializer);
-            inProgressMessages.Add(returnItem.Id, message);
+            bool added = false;
+
+            if (inProgressMessages.ContainsKey(returnItem.Id)) 
+            {
+                inProgressMessages[returnItem.Id] = message;
+            }
+            else
+            {
+                inProgressMessages.TryAdd(returnItem.Id, message);
+            }
+           
             return returnItem;
         }
 
@@ -52,6 +81,9 @@ namespace WebHook.DispatchItemStore.Client.AzureQueueStorage
         {
             QueueMessage message = inProgressMessages[item.Id];
             queue.DeleteMessage(message.MessageId, message.PopReceipt);
+            bool removed = false;
+            inProgressMessages.TryRemove(new KeyValuePair<Guid, QueueMessage>(item.Id, message));
+
         }
     }
 }
