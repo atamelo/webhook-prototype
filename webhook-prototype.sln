@@ -35,9 +35,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebHook.SubscriptionStore.C
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Demos", "Demos", "{6CDA09FA-61B8-447D-9A18-5CE23D275767}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureStoragePlayground", "AzureStoragePlayground\AzureStoragePlayground.csproj", "{454330A5-E7BB-46B3-9433-BF1881C39022}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AzureStoragePlayground", "AzureStoragePlayground\AzureStoragePlayground.csproj", "{454330A5-E7BB-46B3-9433-BF1881C39022}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebHook.DispatchItemStore.Client.AzureQueueStorage", "WebHook.DispatchItemStore.Client.AzureQueueStorage\WebHook.DispatchItemStore.Client.AzureQueueStorage.csproj", "{53A7A0C6-050B-4128-AD52-2323D79B6B73}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebHook.DispatchItemStore.Client.AzureQueueStorage", "WebHook.DispatchItemStore.Client.AzureQueueStorage\WebHook.DispatchItemStore.Client.AzureQueueStorage.csproj", "{53A7A0C6-050B-4128-AD52-2323D79B6B73}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Mocks", "Mocks", "{F00FC014-5E87-450B-9204-86829F8D5B7A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MockWebHookEndpoint", "MockWebHookEndpoint\MockWebHookEndpoint.csproj", "{3A2DC8A7-BDD7-454F-85F6-1F17F4B4A724}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -85,6 +89,10 @@ Global
 		{53A7A0C6-050B-4128-AD52-2323D79B6B73}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{53A7A0C6-050B-4128-AD52-2323D79B6B73}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{53A7A0C6-050B-4128-AD52-2323D79B6B73}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3A2DC8A7-BDD7-454F-85F6-1F17F4B4A724}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3A2DC8A7-BDD7-454F-85F6-1F17F4B4A724}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3A2DC8A7-BDD7-454F-85F6-1F17F4B4A724}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3A2DC8A7-BDD7-454F-85F6-1F17F4B4A724}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -104,6 +112,8 @@ Global
 		{6CDA09FA-61B8-447D-9A18-5CE23D275767} = {4731DDE3-47DF-4EC8-BA71-34A012C67060}
 		{454330A5-E7BB-46B3-9433-BF1881C39022} = {6CDA09FA-61B8-447D-9A18-5CE23D275767}
 		{53A7A0C6-050B-4128-AD52-2323D79B6B73} = {80246D97-5A80-4AFE-AF2E-54320DA6BC7B}
+		{F00FC014-5E87-450B-9204-86829F8D5B7A} = {4731DDE3-47DF-4EC8-BA71-34A012C67060}
+		{3A2DC8A7-BDD7-454F-85F6-1F17F4B4A724} = {F00FC014-5E87-450B-9204-86829F8D5B7A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {318DA05C-C93C-41E9-BC17-9D053EFB1CC3}

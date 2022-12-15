@@ -1,22 +1,24 @@
-﻿using WebHook.DispatchItemStore.Client;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.Net.Http;
+using System.Text;
+using WebHook.DispatchItemStore.Client;
+using static System.Net.WebRequestMethods;
 
 public class DispatcherMockClient : IDispatcherClient
 {
+    private HttpClient client;
+
+    public DispatcherMockClient()
+    {
+        client = new HttpClient();
+    }
     public async Task DispatchAsync(DispatchItem item)
     {
-        item.DispatchCount++;
-        int min = 1000;
-        int max = 7000;
-        Random rand = new();
-        int delay = rand.Next(min, max);
-        await Task.Delay(delay);
-
-
-        int failed = rand.Next(100);
-        if (failed < 2)
-        {
-            throw new Exception("POST FAILED FOR A RANDOM REASON");
-        }
-        //TODO make a % of these throw errors to test out retry buffer and DLQ
+        string json = JsonConvert.SerializeObject(item);
+        var stringContent = new StringContent(json, UnicodeEncoding.UTF8, "application/json");
+        HttpResponseMessage result = await client.PostAsync("http://localhost:51084/Webhook", stringContent);
+        result.EnsureSuccessStatusCode();
+        return;
     }
 }

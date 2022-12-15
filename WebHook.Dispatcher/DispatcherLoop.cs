@@ -10,7 +10,7 @@ public class DispatcherLoop
     private readonly IDispatchItemStore dispatchItemStore;
     private readonly IDispatcherClient dispatcherClient;
     private readonly ILogger<DispatcherLoop> logger;
-
+    private readonly Queue<DispatchItem> bufferedItems = new Queue<DispatchItem>();
     //TODO fill from config
     private readonly int windowSize = 1000;
     public DispatcherLoop(
@@ -26,7 +26,7 @@ public class DispatcherLoop
     {
         try
         {
-            await RunDispatcher(cancellationToken);
+            RunDispatcher(cancellationToken);
         }
         catch (Exception e)
         {
@@ -37,25 +37,55 @@ public class DispatcherLoop
     }
 
 
-    private void RunDispatcher(CancellationToken cancellationToken)
-    {        
-        List<Task> tasks = new();
 
+    private void RunDispatcher(CancellationToken cancellationToken)
+    {
+        Task[] tasks = new Task[windowSize];
+        //Fill window
+        for (int i = 0; i < windowSize; i++)
+        {
+            if (cancellationToken.IsCancellationRequested is true)
+                return;
+
+            UpdateTask(i);
+        }
+
+        //update item window
         while (cancellationToken.IsCancellationRequested is false)
         {
-            while (tasks.Count < windowSize)
-            {
-                IReadOnlyList<DispatchItem> items = dispatchItemStore.GetNext(windowSize - tasks.Count());
-                if (items.Count == 0)
-                {
-                    Thread.Sleep(100);
-                }
-                IEnumerable<Task> newTasks = items.Select(item => TryDispatch(item));
-                tasks.AddRange(newTasks);
-            }
-            tasks.RemoveAll(t => t.IsCompleted);
+            int finished = Task.WaitAny(tasks);
+            UpdateTask(finished);
         }
         return;
+
+        void UpdateTask(int i)
+        {
+            DispatchItem item = GetNextItem();
+            tasks[i] = TryDispatch(item);
+        }
+
+    }
+
+    private DispatchItem GetNextItem()
+    {
+        while (bufferedItems.Count == 0)
+        {
+            IReadOnlyList<DispatchItem> newItems = dispatchItemStore.GetNext(32);
+            if (newItems.Count > 0)
+            {
+                foreach (DispatchItem item in newItems)
+                {
+                    bufferedItems.Enqueue(item);
+                }
+            }
+            else
+            {
+                //No items in store, wait and try again
+                Thread.Sleep(100);
+            }
+        }
+
+        return bufferedItems.Dequeue();
     }
 
     int dispatchCount = 0;

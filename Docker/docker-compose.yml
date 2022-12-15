@@ -21,6 +21,17 @@ services:
       dockerfile: DispatcherDockerfile
     networks:
       - app-network
+  mock_webhook:
+    build:
+      context: ../
+      dockerfile: MockWebHookEndpoint/Dockerfile
+    ports:
+        - '51084:80'
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+    networks:
+      - app-network
   db:
     container_name: postgres_db
     image: postgres:latest
@@ -34,17 +45,17 @@ services:
         - db:/var/lib/postgresql/data
     networks:
       - app-network
-  pgadmin:
-    container_name: pgadmin4_container
-    image: dpage/pgadmin4
-    restart: always
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: root
-    ports:
-      - "5050:80"
-    networks:
-      - app-network
+  #pgadmin:
+  #  container_name: pgadmin4_container
+  #  image: dpage/pgadmin4
+  #  restart: always
+  #  environment:
+  #    PGADMIN_DEFAULT_EMAIL: admin@admin.com
+  #    PGADMIN_DEFAULT_PASSWORD: root
+  #  ports:
+  #    - "5050:80"
+  #  networks:
+  #    - app-network
   azurite:
     image: mcr.microsoft.com/azure-storage/azurite
     hostname: azurite
