@@ -32,6 +32,7 @@ namespace WebHook.DispatchItemStore.Client.AzureQueueStorage
         {
             if(maxMessages>32) maxMessages= 32;
 
+            //TODO how long is long enough? configurable dynaimc?
             QueueMessage[] message = queue.ReceiveMessages(maxMessages: maxMessages, TimeSpan.FromSeconds(30));
 
             if (message is null) return new List<DispatchItem>();
@@ -76,6 +77,8 @@ namespace WebHook.DispatchItemStore.Client.AzureQueueStorage
         public void Remove(DispatchItem item)
         {
             QueueMessage message = inProgressMessages[item.Id];
+
+            //TODO manage responses / errors
             queue.DeleteMessage(message.MessageId, message.PopReceipt);
             bool removed = false;
             inProgressMessages.TryRemove(new KeyValuePair<Guid, QueueMessage>(item.Id, message));

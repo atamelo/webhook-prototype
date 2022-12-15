@@ -80,6 +80,7 @@ public class DispatcherLoop
             }
             else
             {
+                //TODO configurable and maybe dynaic?
                 //No items in store, wait and try again
                 Thread.Sleep(100);
             }
