@@ -22,10 +22,10 @@ internal partial class Program
         IHost host =
             new HostBuilder()
                .ConfigureServices(ConfigureServices)
-               //.ConfigureLogging(loggingBuilder =>
-               //{
-               //    loggingBuilder.AddSimpleConsole(options => options.UseUtcTimestamp = true);
-               //})
+               .ConfigureLogging(loggingBuilder =>
+               {
+                   loggingBuilder.AddSimpleConsole(options => options.UseUtcTimestamp = true);
+               })
                .UseConsoleLifetime()
                .Build();
 
@@ -41,34 +41,8 @@ internal partial class Program
 
         //Extension
         services.AddSubscriptionStore();
-      
-        services.AddTransient<ProducerLoop, ProducerLoopMock>(factory =>
-        {
-            var subscriptionStore = factory.GetService<ISubscriptionStore>()!;
-            var dispatchItemStore = factory.GetService<IDispatchItemStore>()!;
-            var logger = factory.GetService<ILogger<ProducerLoop>>()!;
 
-            BlockingCollection<IEvent> fakeEventQueue = new();
-
-            // NOTE: unobserved task!!
-            Task fakeGenerator = Task.Factory.StartNew(async () =>
-            {
-                Random random = new();
-                
-                while (true)
-                {
-                    string tenantId = random.Next(1, 100).ToString();
-                    string eventId = random.Next(1, 10).ToString();
-
-                    fakeEventQueue.Add(new DummyEvent(tenantId, eventId, DateTime.Now.ToString()));
-                    //await Task.Delay(TimeSpan.FromMilliseconds(1000));
-                }
-
-            }, TaskCreationOptions.LongRunning);
-
-            return new ProducerLoopMock(subscriptionStore, dispatchItemStore, logger, fakeEventQueue);
-        });
-
+        services.AddTransient<ProducerLoop>();
         services.AddSingleton<ISubscriptionStore, PostgresSubscriptionStore>();
         services.AddSingleton<IDispatchItemStore, AzureDispatchItemStore>();
     }

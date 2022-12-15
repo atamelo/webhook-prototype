@@ -82,7 +82,6 @@ public class DispatcherLoop
             }
             else
             {
-
                 //TODO configurable, caps, amounts figure it out
                 //https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-storage-queue-trigger?tabs=in-process%2Cextensionv5&pivots=programming-language-csharp#polling-algorithm
                 TimeSpan delay = TimeSpan.FromMilliseconds(100) * FetchAttempt;

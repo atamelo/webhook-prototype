@@ -1,7 +1,9 @@
 ﻿using Confluent.Kafka;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using WebHook.Contracts.Events;
 using WebHook.DispatchItemStore.Client;
+using WebHook.DispatchItemStore.Client.Redis;
 using WebHook.SubscriptionStore.Client;
 using WebHook.SubscriptionStore.Client.Models;
 
@@ -38,6 +40,8 @@ public class ProducerLoop
             {
                 // NOTE: in Kafka client this is also a blocking call
                 ConsumeResult<string, IEvent> record = eventLogConsumer.Consume(stopSignal);
+
+                if (record?.Message?.Value is null) continue;
 
                 // TODO: add extensive logging
 
@@ -76,7 +80,7 @@ public class ProducerLoop
         logger.LogInformation("Creating kafka consumer...");
 
         // TODO: set up proper deserializer!!
-        var builder = new ConsumerBuilder<string, IEvent>(config).SetValueDeserializer(null);
+        var builder = new ConsumerBuilder<string, IEvent>(config).SetValueDeserializer(new EventDeserilizer());
         IConsumer<string, IEvent> kafkaConsumer = builder.Build();
 
         kafkaConsumer.Subscribe(config.TopicNames);
@@ -84,6 +88,23 @@ public class ProducerLoop
         return kafkaConsumer;
     }
 
+    public class EventDeserilizer : IDeserializer<IEvent>
+    {
+        public IEvent Deserialize(ReadOnlySpan<byte> data, bool isNull, SerializationContext context)
+        {
+            try
+            {
+                var str = System.Text.Encoding.Default.GetString(data);
+                return JsonConvert.DeserializeObject<IEvent>(str, new EventConverter());
+            }
+            catch (Exception e)
+            {
+                //TODO log fix etc
+                return null;
+            }
+          
+        }
+    }
     public class EventLogConsumerConfig : ConsumerConfig
     {
         public IReadOnlyList<string> TopicNames { get; }

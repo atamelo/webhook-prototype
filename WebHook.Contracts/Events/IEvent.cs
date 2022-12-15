@@ -7,4 +7,3 @@ public interface IEvent
     public string EventID { get; }
     public string Payload { get; }
 }
-public record DummyEvent(string TenantID, string EventID, string Payload) : IEvent;
