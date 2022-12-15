@@ -37,28 +37,23 @@ public class DispatcherLoop
     }
 
 
-    private async Task RunDispatcher(CancellationToken cancellationToken)
-    {
+    private void RunDispatcher(CancellationToken cancellationToken)
+    {        
         List<Task> tasks = new();
+
         while (cancellationToken.IsCancellationRequested is false)
         {
-            WindowFill();
-            tasks.RemoveAll(t => t.IsCompleted);
-        }
-
-        //Top off sliding window
-        void WindowFill()
-        {
-            while (tasks.Count() < windowSize)
+            while (tasks.Count < windowSize)
             {
                 IReadOnlyList<DispatchItem> items = dispatchItemStore.GetNext(windowSize - tasks.Count());
-                if (items.Any() is false) 
-                { 
-                    Thread.Sleep(100); 
+                if (items.Count == 0)
+                {
+                    Thread.Sleep(100);
                 }
                 IEnumerable<Task> newTasks = items.Select(item => TryDispatch(item));
                 tasks.AddRange(newTasks);
             }
+            tasks.RemoveAll(t => t.IsCompleted);
         }
         return;
     }
