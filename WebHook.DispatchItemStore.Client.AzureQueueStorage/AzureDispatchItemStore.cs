@@ -53,12 +53,8 @@ namespace WebHook.DispatchItemStore.Client.AzureQueueStorage
         private DispatchItem ConvertToDispatchItem(QueueMessage message)
         {
             string stringData = message.Body.ToString();
-            JObject obj = JObject.Parse(stringData);
-            var jsonSerializer = new JsonSerializer();
-            jsonSerializer.Converters.Add(new EventConverter());
-            DispatchItem returnItem = obj.ToObject<DispatchItem>(jsonSerializer);
-            bool added = false;
-
+      
+            DispatchItem returnItem = JsonConvert.DeserializeObject<DispatchItem>(stringData, new EventConverter());
             if (inProgressMessages.ContainsKey(returnItem.Id)) 
             {
                 inProgressMessages[returnItem.Id] = message;
@@ -73,7 +69,7 @@ namespace WebHook.DispatchItemStore.Client.AzureQueueStorage
 
         public void Put(DispatchItem item)
         {
-            string stringItem = JObject.FromObject(item).ToString();
+            string stringItem = JsonConvert.SerializeObject(item, Formatting.None);
             queue.SendMessage(stringItem);
         }
 
