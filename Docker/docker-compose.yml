@@ -15,12 +15,12 @@ services:
       - 'redis_data:/bitnami/redis/data'
     networks:
       - app-network
-  dispatcher:
-    build:
-      context: ../
-      dockerfile: DispatcherDockerfile
-    networks:
-      - app-network
+  #dispatcher:
+  #  build:
+  #    context: ../
+  #    dockerfile: DispatcherDockerfile
+  #  networks:
+  #    - app-network
   mock_webhook:
     build:
       context: ../
