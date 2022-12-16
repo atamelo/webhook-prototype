@@ -7,6 +7,9 @@ namespace WebHook.SubscriptionStore.Client.Postgres.Database
 
         public static void InitializeMockData(WebhookContext context)
         {
+            //TODO migrations
+
+            //TODO config all this out
             context.Database.EnsureCreated();
             if (context.Subscriptions.Any()) return;
 
@@ -18,7 +21,7 @@ namespace WebHook.SubscriptionStore.Client.Postgres.Database
                 subscription.EventId = random.Next(1, 10).ToString();
                 subscription.TenantId = random.Next(1, 100).ToString();
                 subscription.Active = true;
-                subscription.Url = "http://localhost:5678/webhook";
+                subscription.Url = "http://localhost:5678/webhook";//TODO config this as well
 
                 context.Subscriptions.Add(subscription);
             }
