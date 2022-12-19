@@ -39,6 +39,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MockWebHookEndpoint", "Mock
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MockKafkaEventProducer", "MockKafkaEventProducer\MockKafkaEventProducer.csproj", "{AB025607-B20E-4699-A4B9-262243DD5F20}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Webhook.Dispatcher.AzureFunction", "Webhook.Dispatcher.AzureFunction\Webhook.Dispatcher.AzureFunction.csproj", "{17EDE83C-CD2B-4822-863F-579AF06DF295}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -89,6 +91,10 @@ Global
 		{AB025607-B20E-4699-A4B9-262243DD5F20}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AB025607-B20E-4699-A4B9-262243DD5F20}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AB025607-B20E-4699-A4B9-262243DD5F20}.Release|Any CPU.Build.0 = Release|Any CPU
+		{17EDE83C-CD2B-4822-863F-579AF06DF295}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{17EDE83C-CD2B-4822-863F-579AF06DF295}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{17EDE83C-CD2B-4822-863F-579AF06DF295}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{17EDE83C-CD2B-4822-863F-579AF06DF295}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -108,6 +114,7 @@ Global
 		{F00FC014-5E87-450B-9204-86829F8D5B7A} = {4731DDE3-47DF-4EC8-BA71-34A012C67060}
 		{3A2DC8A7-BDD7-454F-85F6-1F17F4B4A724} = {F00FC014-5E87-450B-9204-86829F8D5B7A}
 		{AB025607-B20E-4699-A4B9-262243DD5F20} = {F00FC014-5E87-450B-9204-86829F8D5B7A}
+		{17EDE83C-CD2B-4822-863F-579AF06DF295} = {4731DDE3-47DF-4EC8-BA71-34A012C67060}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {318DA05C-C93C-41E9-BC17-9D053EFB1CC3}

@@ -3,7 +3,7 @@ using Azure.Storage.Queues.Models;
 using Newtonsoft.Json.Linq;
 using System.Text;
 using System;
-using WebHook.DispatchItemStore.Client.Redis;
+using WebHook.DispatchItemStore.Client;
 using Newtonsoft.Json;
 using System.Collections.Concurrent;
 
@@ -18,8 +18,14 @@ namespace WebHook.DispatchItemStore.Client.AzureQueueStorage
             //TODO Config
             queue = new(
                 "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;QueueEndpoint=http://127.0.0.1:10001/devstoreaccount1;",
-                "dispatch"
+                "dispatch",
+                //FOR AZURE FUNCTIONS THEY NEED 64 ENCODING
+                new QueueClientOptions
+                {
+                    MessageEncoding = QueueMessageEncoding.Base64
+                }
             );
+           
             queue.CreateIfNotExists();
         }
         public void DelayRequeue(DispatchItem item, TimeSpan delay)

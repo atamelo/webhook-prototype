@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using WebHook.Contracts.Events;
 
-namespace WebHook.DispatchItemStore.Client.Redis
+namespace WebHook.DispatchItemStore.Client
 {
     public class EventConverter : JsonConverter
     {
