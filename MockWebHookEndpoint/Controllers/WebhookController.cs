@@ -20,8 +20,8 @@ namespace MockWebHookEndpoint.Controllers
             int delay = random.Next(500, 7000);
             await Task.Delay(delay);
 
-            
-            var errorChance = random.Next(100);
+
+            int errorChance = random.Next(100);
 
             //2% failure raite
             if (errorChance <= 2)

@@ -20,7 +20,7 @@ namespace WebHook.SubscriptionStore.Client.Postgres.Extensions
         }
         public static void CreateDB(this IHost host)
         {
-            using (var scope = host.Services.CreateScope())
+            using (IServiceScope scope = host.Services.CreateScope())
             {
                 WebhookContext context =
                     scope.ServiceProvider.GetRequiredService<WebhookContext>();

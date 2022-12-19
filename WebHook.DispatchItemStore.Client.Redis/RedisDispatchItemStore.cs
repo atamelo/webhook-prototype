@@ -93,7 +93,7 @@ namespace WebHook.DispatchItemStore.Client.Redis
         private DispatchItem ToDispatchItem(RedisValue value)
         {
             JObject obj = JObject.Parse(value.ToString());
-            var jsonSerializer = new JsonSerializer();
+            JsonSerializer jsonSerializer = new JsonSerializer();
             jsonSerializer.Converters.Add(new EventConverter());
             DispatchItem returnItem = obj.ToObject<DispatchItem>(jsonSerializer);
             return returnItem;

@@ -6,12 +6,12 @@ using Newtonsoft.Json.Linq;
 using WebHook.Contracts.Events;
 
 //TODO config
-var config = new ProducerConfig { BootstrapServers = "localhost:9092" };
+ProducerConfig config = new ProducerConfig { BootstrapServers = "localhost:9092" };
 
 // If serializers are not specified, default serializers from
 // `Confluent.Kafka.Serializers` will be automatically used where
 // available. Note: by default strings are encoded as UTF8.
-using (var p = new ProducerBuilder<Null, string>(config).Build())
+using (IProducer<Null, string> p = new ProducerBuilder<Null, string>(config).Build())
 {
     Random rand = new();
   
