@@ -17,8 +17,13 @@ namespace WebHook.SubscriptionStore.Client.Postgres
             this.webhookContext = webhookContext;
             
         }
-        //TODO create subs etc
+        
 
+        //TODO we need CRUD operations
+
+
+        //TODO offload to redis or something so its shared across system
+        //right now cache is super hacky and assumes subscriptsions never change
         Dictionary<string, IReadOnlyList<Subscription>> cache = new();
         public IReadOnlyList<Subscription> GetSubscriptionsFor<TEvent>(TEvent @event, CancellationToken cancellationToken) where TEvent : IEvent
         {
