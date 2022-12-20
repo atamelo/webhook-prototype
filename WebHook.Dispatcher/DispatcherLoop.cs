@@ -1,18 +1,19 @@
-﻿using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Logging;
-using MiNET.Utils.Collections;
-using System.Collections.Concurrent;
-using System.Timers;
-using WebHook.Contracts.Events;
+﻿using Microsoft.Extensions.Logging;
+using WebHook.Core.Models;
 using WebHook.DispatchItemStore.Client;
+
 public class DispatcherLoop
 {
     private readonly IDispatchItemStore dispatchItemStore;
     private readonly IDispatcherClient dispatcherClient;
     private readonly ILogger<DispatcherLoop> logger;
     private readonly Queue<DispatchItem> bufferedItems = new Queue<DispatchItem>();
+
     //TODO fill from config
-    private readonly int windowSize = 1000;
+    private readonly int windowSize;
+
+    private int dispatchCount;
+
     public DispatcherLoop(
         IDispatchItemStore dispatchItemStore,
         IDispatcherClient dispatcherClient,
@@ -21,8 +22,11 @@ public class DispatcherLoop
         this.dispatchItemStore = dispatchItemStore;
         this.dispatcherClient = dispatcherClient;
         this.logger = logger;
+        this.windowSize = 1000;
+        this.dispatchCount = 0;
     }
-    public async Task Start(CancellationToken cancellationToken)
+
+    public void Start(CancellationToken cancellationToken)
     {
         try
         {
@@ -33,10 +37,7 @@ public class DispatcherLoop
             logger.LogError(e, "Dispatcher loop critical failure");
             throw;
         }
-
     }
-
-
 
     private void RunDispatcher(CancellationToken cancellationToken)
     {
@@ -45,7 +46,9 @@ public class DispatcherLoop
         for (int i = 0; i < windowSize; i++)
         {
             if (cancellationToken.IsCancellationRequested is true)
+            {
                 return;
+            }
 
             UpdateTask(i);
         }
@@ -63,7 +66,6 @@ public class DispatcherLoop
             DispatchItem item = GetNextItem();
             tasks[i] = TryDispatch(item);
         }
-
     }
 
     private DispatchItem GetNextItem()
@@ -85,7 +87,7 @@ public class DispatcherLoop
                 //TODO configurable, caps, amounts figure it out
                 //https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-storage-queue-trigger?tabs=in-process%2Cextensionv5&pivots=programming-language-csharp#polling-algorithm
                 TimeSpan delay = TimeSpan.FromMilliseconds(100) * FetchAttempt;
-                if(delay > TimeSpan.FromMinutes(1))
+                if (delay > TimeSpan.FromMinutes(1))
                 {
                     delay = TimeSpan.FromMinutes(1);
                 }
@@ -96,7 +98,6 @@ public class DispatcherLoop
         return bufferedItems.Dequeue();
     }
 
-    int dispatchCount = 0;
     private async Task TryDispatch(DispatchItem @event)
     {
         try
@@ -108,14 +109,14 @@ public class DispatcherLoop
             {
                 logger.LogInformation($"Success Dispatch Count: {dispatchCount}");
             }
-
         }
-        catch (Exception e)
+        catch (Exception)
         {
             ProcessFailure(@event);
             //logger.LogError(e.Message, e);
         }
     }
+
     private void ProcessFailure(DispatchItem @event)
     {
         if (@event.DispatchCount >= 3)
@@ -128,5 +129,4 @@ public class DispatcherLoop
         TimeSpan retryDelay = TimeSpan.FromMinutes(1);
         dispatchItemStore.DelayRequeue(@event, retryDelay);
     }
-
 }

@@ -1,18 +1,16 @@
-﻿using Azure.Storage.Queues;
+﻿using System.Collections.Concurrent;
+using Azure.Storage.Queues;
 using Azure.Storage.Queues.Models;
-using Newtonsoft.Json.Linq;
-using System.Text;
-using System;
-using WebHook.DispatchItemStore.Client;
 using Newtonsoft.Json;
-using System.Collections.Concurrent;
+using WebHook.Core.Models;
 
 namespace WebHook.DispatchItemStore.Client.AzureQueueStorage
 {
     public class AzureDispatchItemStore : IDispatchItemStore
     {
-        QueueClient queue;
-        ConcurrentDictionary<Guid, QueueMessage> inProgressMessages = new();
+        private readonly QueueClient queue;
+        private readonly ConcurrentDictionary<Guid, QueueMessage> inProgressMessages = new();
+
         public AzureDispatchItemStore()
         {
             //TODO make from config
@@ -24,10 +22,11 @@ namespace WebHook.DispatchItemStore.Client.AzureQueueStorage
                 {
                     MessageEncoding = QueueMessageEncoding.Base64
                 }
-            );
-           
+                       );
+
             queue.CreateIfNotExists();
         }
+
         public void DelayRequeue(DispatchItem item, TimeSpan delay)
         {
             QueueMessage message = inProgressMessages[item.Id];
@@ -36,12 +35,18 @@ namespace WebHook.DispatchItemStore.Client.AzureQueueStorage
 
         public IReadOnlyList<DispatchItem> GetNext(int maxMessages)
         {
-            if(maxMessages>32) maxMessages= 32;
+            if (maxMessages > 32)
+            {
+                maxMessages = 32;
+            }
 
             //TODO how long is long enough? configurable dynaimc?
             QueueMessage[] message = queue.ReceiveMessages(maxMessages: maxMessages, TimeSpan.FromSeconds(30));
 
-            if (message is null) return new List<DispatchItem>();
+            if (message is null)
+            {
+                return new List<DispatchItem>();
+            }
 
             return message.Select(m => ConvertToDispatchItem(m)).ToList();
         }
@@ -50,7 +55,10 @@ namespace WebHook.DispatchItemStore.Client.AzureQueueStorage
         {
             QueueMessage message = queue.ReceiveMessage(TimeSpan.FromSeconds(30));
 
-            if (message is null) return null;
+            if (message is null)
+            {
+                return null;
+            }
 
             DispatchItem returnItem = ConvertToDispatchItem(message);
 
@@ -60,9 +68,9 @@ namespace WebHook.DispatchItemStore.Client.AzureQueueStorage
         private DispatchItem ConvertToDispatchItem(QueueMessage message)
         {
             string stringData = message.Body.ToString();
-      
+
             DispatchItem returnItem = JsonConvert.DeserializeObject<DispatchItem>(stringData, new EventConverter());
-            if (inProgressMessages.ContainsKey(returnItem.Id)) 
+            if (inProgressMessages.ContainsKey(returnItem.Id))
             {
                 inProgressMessages[returnItem.Id] = message;
             }
@@ -70,7 +78,7 @@ namespace WebHook.DispatchItemStore.Client.AzureQueueStorage
             {
                 inProgressMessages.TryAdd(returnItem.Id, message);
             }
-           
+
             return returnItem;
         }
 
@@ -87,7 +95,6 @@ namespace WebHook.DispatchItemStore.Client.AzureQueueStorage
             //TODO manage responses / errors
             queue.DeleteMessage(message.MessageId, message.PopReceipt);
             inProgressMessages.TryRemove(new KeyValuePair<Guid, QueueMessage>(item.Id, message));
-
         }
     }
 }

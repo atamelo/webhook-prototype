@@ -15,9 +15,8 @@ namespace WebHook.SubscriptionStore.Client.Postgres.Extensions
                 options.UseNpgsql("Host=localhost:5432;Database=webhooks;Username=postgres;Password=postgres");
                 options.EnableSensitiveDataLogging(false);
             });
-
-
         }
+
         public static void CreateDB(this IHost host)
         {
             using (IServiceScope scope = host.Services.CreateScope())
@@ -25,9 +24,7 @@ namespace WebHook.SubscriptionStore.Client.Postgres.Extensions
                 WebhookContext context =
                     scope.ServiceProvider.GetRequiredService<WebhookContext>();
                 DbInitializer.InitializeMockData(context);
-
             }
         }
     }
-
 }

@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "WebHook.Contracts": {
+    "WebHook.Core": {
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {

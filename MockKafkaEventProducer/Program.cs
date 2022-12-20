@@ -1,9 +1,7 @@
-﻿
-
-using Confluent.Kafka;
+﻿using Confluent.Kafka;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using WebHook.Contracts.Events;
+using WebHook.Core.Events;
 
 //TODO config
 ProducerConfig config = new ProducerConfig { BootstrapServers = "localhost:9092" };
@@ -14,31 +12,28 @@ ProducerConfig config = new ProducerConfig { BootstrapServers = "localhost:9092"
 using (IProducer<Null, string> p = new ProducerBuilder<Null, string>(config).Build())
 {
     Random rand = new();
-  
+
     while (true)
     {
         try
         {
             int tenantId = rand.Next(1, 100);
             int eventId = rand.Next(1, 10);
-            DeliveryResult<Null, string> dr = await ProduceEvent(p,tenantId, eventId);
-           
+            DeliveryResult<Null, string> dr = await ProduceEvent(p, tenantId, eventId);
         }
         catch (ProduceException<Null, string> e)
         {
             Console.WriteLine($"Delivery failed: {e.Error.Reason}");
         }
     }
-   
 }
 
-static async Task<DeliveryResult<Null, string>> ProduceEvent(IProducer<Null, string> p,int tenantId, int eventId)
+static async Task<DeliveryResult<Null, string>> ProduceEvent(IProducer<Null, string> p, int tenantId, int eventId)
 {
-
     DummyEvent @event = new(
-        tenantId.ToString(), 
-        eventId.ToString(), 
+        tenantId.ToString(),
+        eventId.ToString(),
         JObject.FromObject(new { data = "im a real event" }).ToString()
-        );
+                           );
     return await p.ProduceAsync("test-topic", new Message<Null, string> { Value = JsonConvert.SerializeObject(@event) });
 }

@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
-using System.IO.Pipes;
+using WebHook.Core.Models;
 using WebHook.DispatchItemStore.Client;
 
 namespace WebHook.Producer.Mocks;
@@ -35,7 +35,7 @@ public class DispatchItemStoreMock : IDispatchItemStore
 
     public void Put(DispatchItem item)
     {
-        this.logger.LogInformation("Dispatch item for subscriber {TenantID} with URL={Url} received.", item.Event.TenantID, item.Subscription.Url);
+        throw new NotImplementedException();
     }
 
     public void Remove(DispatchItem item)

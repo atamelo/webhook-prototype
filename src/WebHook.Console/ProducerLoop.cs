@@ -1,10 +1,10 @@
-﻿using Confluent.Kafka;
-using Microsoft.Extensions.Logging;
-using WebHook.Contracts.Events;
+﻿using Microsoft.Extensions.Logging;
+using Confluent.Kafka;
+using WebHook.Core.Events;
+using WebHook.Core.Models;
 using WebHook.DispatchItemStore.Client;
-using WebHook.DispatchItemStore.Client.Redis;
+using WebHook.SubscriptionSotre.Client.Models;
 using WebHook.SubscriptionStore.Client;
-using WebHook.SubscriptionStore.Client.Models;
 
 namespace WebHook.Producer;
 
@@ -40,15 +40,18 @@ public partial class ProducerLoop
                 // NOTE: in Kafka client this is also a blocking call
                 ConsumeResult<string, IEvent> record = eventLogConsumer.Consume(stopSignal);
 
-                if (record?.Message?.Value is null) continue;
+                if (record?.Message?.Value is null)
+                {
+                    continue;
+                }
 
                 // TODO: add extensive logging
 
-                IReadOnlyList<Subscription> subscriptions = subscriptionStore.GetSubscriptionsFor(record.Message.Value, stopSignal);
+                IReadOnlyList<SubscriptionDTO> subscriptions = subscriptionStore.GetSubscriptionsFor(record.Message.Value, stopSignal);
 
-                foreach (Subscription subscription in subscriptions)
+                foreach (SubscriptionDTO subscription in subscriptions)
                 {
-                    DispatchItem item = new(Guid.NewGuid(), subscription, record.Message.Value);
+                    DispatchItem item = new(Guid.NewGuid(), record.Message.Value);
                     dispatchItemStore.Put(item);
                 }
 
@@ -58,7 +61,7 @@ public partial class ProducerLoop
 
                 // in reality, when multiple Producer nodes are deployed, the batchSize
                 // is only observed in scope of a single node. So, globally (or from the perspective
-                // of the dispatchItemStore), the size of a batch can be somewhere from 1 to 
+                // of the dispatchItemStore), the size of a batch can be somewhere from 1 to
                 // number_of_nodes * (batchSize - 1) items.
                 if (batchSizeReached)
                 {

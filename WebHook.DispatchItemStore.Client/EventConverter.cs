@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json;
-using WebHook.Contracts.Events;
+using WebHook.Core.Events;
 
 namespace WebHook.DispatchItemStore.Client
 {

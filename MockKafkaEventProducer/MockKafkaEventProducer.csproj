@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\WebHook.Contracts\WebHook.Contracts.csproj" />
+    <ProjectReference Include="..\WebHook.Core\WebHook.Core.csproj" />
   </ItemGroup>
 
 </Project>

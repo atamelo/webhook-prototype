@@ -1,7 +1,7 @@
-﻿using Confluent.Kafka;
+﻿using System.Collections.Concurrent;
 using Microsoft.Extensions.Logging;
-using System.Collections.Concurrent;
-using WebHook.Contracts.Events;
+using Confluent.Kafka;
+using WebHook.Core.Events;
 using WebHook.DispatchItemStore.Client;
 using WebHook.SubscriptionStore.Client;
 

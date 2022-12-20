@@ -1,7 +1,6 @@
-﻿using Confluent.Kafka;
-using Microsoft.Extensions.Hosting;
+﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using WebHook.Producer;
+using Confluent.Kafka;
 
 namespace WebHook.Producer;
 

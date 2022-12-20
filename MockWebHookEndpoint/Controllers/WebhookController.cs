@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using MockWebHookEndpoint.Logic;
 
 namespace MockWebHookEndpoint.Controllers
 {
@@ -6,30 +7,25 @@ namespace MockWebHookEndpoint.Controllers
     [Route("[controller]")]
     public class WebhookController : ControllerBase
     {
-        private ILogger<WebhookController> _logger;
+        private readonly MockHelper helper;
+        private readonly ILogger<WebhookController> _logger;
 
-        public WebhookController(ILogger<WebhookController> logger)
+        public WebhookController(MockHelper helper, ILogger<WebhookController> logger)
         {
+            this.helper = helper;
             _logger = logger;
         }
 
         [HttpPost]
         public async Task<IActionResult> PostAsync()
         {
-            Random random = new();
-            int delay = random.Next(500, 7000);
-            await Task.Delay(delay);
-
-
-            int errorChance = random.Next(100);
-
-            //2% failure raite
+            await helper.RandomDelayAsync();
+            int errorChance = helper.RandomNext(100);
             if (errorChance <= 2)
             {
                 //TODO add more codes to deal with
                 return new StatusCodeResult(500);
             }
-
             return new OkResult();
         }
     }

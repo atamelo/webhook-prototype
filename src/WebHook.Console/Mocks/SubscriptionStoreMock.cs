@@ -1,15 +1,14 @@
-﻿using WebHook.Contracts.Events;
+﻿using WebHook.Core.Events;
+using WebHook.SubscriptionSotre.Client.Models;
 using WebHook.SubscriptionStore.Client;
-using WebHook.SubscriptionStore.Client.Models;
 
 namespace WebHook.Producer.Mocks;
 
 public class SubscriptionStoreMock : ISubscriptionStore
 {
-    private readonly string[] fakeUrls = new [] { "URL-1", "URL-2" };
+    private readonly string[] fakeUrls = new[] { "URL-1", "URL-2" };
 
-   
-    public IReadOnlyList<Subscription> GetSubscriptionsFor<TEvent>(TEvent @event, CancellationToken cancellationToken) where TEvent : IEvent
+    public IReadOnlyList<SubscriptionDTO> GetSubscriptionsFor<TEvent>(TEvent @event, CancellationToken cancellationToken) where TEvent : IEvent
     {
         throw new NotImplementedException();
     }

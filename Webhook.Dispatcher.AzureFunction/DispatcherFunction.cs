@@ -1,12 +1,10 @@
-using System;
-using System.Configuration;
 using System.Text;
-using Azure.Storage.Queues;
-using Azure.Storage.Queues.Models;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using WebHook.Core.Models;
 using WebHook.DispatchItemStore.Client;
+using WebHook.SubscriptionSotre.Client.Models;
 
 namespace Webhook.Dispatcher.AzureFunction
 {
@@ -22,17 +20,14 @@ namespace Webhook.Dispatcher.AzureFunction
         [Function("DispatcherFunction")]
         public async Task Run([QueueTrigger("dispatch", Connection = "AzureStorageQueueConnection")] string message)
         {
-            
             DispatchItem item = ConvertToDispatchItem(message);
-
 
             //Functions have built in rety into host file so if failes item will be queued again after x time and then sent to DLQ after 3 attempts
             //all set in the host.json
             //TODO catch exception types etc, probably want logic on per error code basis
             await DispatchAsync(item);
-
-
         }
+
         public async Task DispatchAsync(DispatchItem item)
         {
             //TODO connection close, probably make a factory etc
@@ -42,6 +37,7 @@ namespace Webhook.Dispatcher.AzureFunction
             HttpResponseMessage result = await client.PostAsync("http://localhost:51084/Webhook", stringContent);
             result.EnsureSuccessStatusCode();
         }
+
         private static DispatchItem ConvertToDispatchItem(string stringData)
         {
             return JsonConvert.DeserializeObject<DispatchItem>(stringData, new EventConverter());

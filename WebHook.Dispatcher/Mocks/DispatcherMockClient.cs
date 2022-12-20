@@ -1,18 +1,18 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System.Net.Http;
-using System.Text;
+﻿using System.Text;
+using Newtonsoft.Json;
+using WebHook.Core.Models;
 using WebHook.DispatchItemStore.Client;
-using static System.Net.WebRequestMethods;
+using WebHook.SubscriptionSotre.Client.Models;
 
 public class DispatcherMockClient : IDispatcherClient
 {
-    private HttpClient client;
+    private readonly HttpClient client;
 
     public DispatcherMockClient()
     {
         client = new HttpClient();
     }
+
     public async Task DispatchAsync(DispatchItem item)
     {
         string json = JsonConvert.SerializeObject(item);

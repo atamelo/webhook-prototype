@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using WebHook.SubscriptionStore.Client.Models;
+using WebHook.SubscriptionSotre.Client.Models;
+using WebHook.SubscriptionStore.Client.Postgres.Entities;
 
 namespace WebHook.SubscriptionStore.Client.Postgres.Database
 {
@@ -8,7 +9,7 @@ namespace WebHook.SubscriptionStore.Client.Postgres.Database
         public WebhookContext(DbContextOptions<WebhookContext> options) : base(options)
         {
         }
-        public DbSet<Subscription> Subscriptions { get; set; }
 
+        public DbSet<SubscriptionEntity> Subscriptions { get; set; }
     }
 }

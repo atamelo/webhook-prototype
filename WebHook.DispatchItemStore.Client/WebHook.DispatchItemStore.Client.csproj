@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\WebHook.Contracts\WebHook.Contracts.csproj" />
+    <ProjectReference Include="..\WebHook.Core\WebHook.Core.csproj" />
     <ProjectReference Include="..\WebHook.SubscriptionStore.Client.Postgres\WebHook.SubscriptionStore.Client.Postgres.csproj" />
   </ItemGroup>
 

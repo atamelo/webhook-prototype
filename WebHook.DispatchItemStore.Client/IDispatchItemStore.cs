@@ -1,4 +1,7 @@
-﻿namespace WebHook.DispatchItemStore.Client;
+﻿using WebHook.Core.Models;
+
+namespace WebHook.DispatchItemStore.Client;
+
 public interface IDispatchItemStore
 {
     void Put(DispatchItem item);
@@ -6,6 +9,8 @@ public interface IDispatchItemStore
     void Remove(DispatchItem item);
 
     DispatchItem? GetNextOrDefault();
+
     void DelayRequeue(DispatchItem item, TimeSpan delay);
+
     IReadOnlyList<DispatchItem> GetNext(int count);
 }
