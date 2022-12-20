@@ -30,7 +30,7 @@ namespace WebHook.SubscriptionStore.Client.Postgres
                 s.TenantId == @event.SubscriberId &&
                 s.Active).ToList();
 
-                List<SubscriptionDTO> subscriptionDTOs = subscriptions.Select(s => Map(s)).ToList();
+                List<SubscriptionDTO> subscriptionDTOs = subscriptions.Select(Map).ToList();
                 cache.Add(key, subscriptionDTOs);
             }
             return cache[key];

@@ -50,21 +50,21 @@ public class DispatcherLoop
                 return;
             }
 
-            UpdateTask(i);
+            UpdateAtIndex(i);
         }
 
         //update item window
         while (cancellationToken.IsCancellationRequested is false)
         {
             int finished = Task.WaitAny(tasks);
-            UpdateTask(finished);
+            UpdateAtIndex(finished);
         }
         return;
 
-        void UpdateTask(int i)
+        void UpdateAtIndex(int finishedTask)
         {
             DispatchItem item = GetNextItem();
-            tasks[i] = TryDispatch(item);
+            tasks[finishedTask] = TryDispatch(item);
         }
     }
 

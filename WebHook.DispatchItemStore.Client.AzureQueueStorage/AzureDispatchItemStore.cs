@@ -9,10 +9,13 @@ namespace WebHook.DispatchItemStore.Client.AzureQueueStorage
     public class AzureDispatchItemStore : IDispatchItemStore
     {
         private readonly QueueClient queue;
-        private readonly ConcurrentDictionary<Guid, QueueMessage> inProgressMessages = new();
+
+        //Concurrent since remove is taking place on different threads
+        private readonly ConcurrentDictionary<Guid, QueueMessage> inProgressMessages;
 
         public AzureDispatchItemStore()
         {
+            inProgressMessages = new();
             //TODO make from config
             queue = new(
                 "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;QueueEndpoint=http://127.0.0.1:10001/devstoreaccount1;",
@@ -35,20 +38,17 @@ namespace WebHook.DispatchItemStore.Client.AzureQueueStorage
 
         public IReadOnlyList<DispatchItem> GetNext(int maxMessages)
         {
-            if (maxMessages > 32)
-            {
-                maxMessages = 32;
-            }
+            maxMessages = Math.Min(32, maxMessages);
 
             //TODO how long is long enough? configurable dynaimc?
             QueueMessage[] message = queue.ReceiveMessages(maxMessages: maxMessages, TimeSpan.FromSeconds(30));
 
             if (message is null)
             {
-                return new List<DispatchItem>();
+                return Array.Empty<DispatchItem>();
             }
 
-            return message.Select(m => ConvertToDispatchItem(m)).ToList();
+            return message.Select(ConvertToDispatchItem).ToList();
         }
 
         public DispatchItem? GetNextOrDefault()
