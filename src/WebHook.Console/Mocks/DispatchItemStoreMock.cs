@@ -13,27 +13,12 @@ public class DispatchItemStoreMock : IDispatchItemStore
         this.logger = logger;
     }
 
-    public void DelayRequeue(DispatchItem item, TimeSpan delay)
+    public void Enqueue(DispatchItem item, TimeSpan delay)
     {
         throw new NotImplementedException();
     }
 
     public IReadOnlyList<DispatchItem> GetNext(int count)
-    {
-        throw new NotImplementedException();
-    }
-
-    public DispatchItem? GetNextOrDefault()
-    {
-        throw new NotImplementedException();
-    }
-
-    public DispatchItem? GetNextOrDefault(int count)
-    {
-        throw new NotImplementedException();
-    }
-
-    public void Put(DispatchItem item)
     {
         throw new NotImplementedException();
     }

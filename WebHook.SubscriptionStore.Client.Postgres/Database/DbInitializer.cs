@@ -1,5 +1,4 @@
-﻿using WebHook.SubscriptionSotre.Client.Models;
-using WebHook.SubscriptionStore.Client.Postgres.Entities;
+﻿using WebHook.SubscriptionStore.Client.Postgres.Entities;
 
 namespace WebHook.SubscriptionStore.Client.Postgres.Database
 {

@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using WebHook.Core.Models;
 using WebHook.DispatchItemStore.Client;
-using WebHook.SubscriptionSotre.Client.Models;
 
 namespace Webhook.Dispatcher.AzureFunction
 {

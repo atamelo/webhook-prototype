@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using WebHook.SubscriptionSotre.Client.Models;
 using WebHook.SubscriptionStore.Client.Postgres.Entities;
 
 namespace WebHook.SubscriptionStore.Client.Postgres.Database

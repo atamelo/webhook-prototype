@@ -52,7 +52,7 @@ public partial class ProducerLoop
                 foreach (SubscriptionDTO subscription in subscriptions)
                 {
                     DispatchItem item = new(Guid.NewGuid(), record.Message.Value);
-                    dispatchItemStore.Put(item);
+                    dispatchItemStore.Enqueue(item);
                 }
 
                 eventsProcessed++;

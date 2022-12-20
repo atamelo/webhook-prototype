@@ -4,13 +4,9 @@ namespace WebHook.DispatchItemStore.Client;
 
 public interface IDispatchItemStore
 {
-    void Put(DispatchItem item);
-
     void Remove(DispatchItem item);
 
-    DispatchItem? GetNextOrDefault();
-
-    void DelayRequeue(DispatchItem item, TimeSpan delay);
+    void Enqueue(DispatchItem item, TimeSpan delay = default);
 
     IReadOnlyList<DispatchItem> GetNext(int count);
 }

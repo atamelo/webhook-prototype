@@ -127,6 +127,6 @@ public class DispatcherLoop
         }
 
         TimeSpan retryDelay = TimeSpan.FromMinutes(1);
-        dispatchItemStore.DelayRequeue(@event, retryDelay);
+        dispatchItemStore.Enqueue(@event, retryDelay);
     }
 }

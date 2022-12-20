@@ -1,8 +1,6 @@
 ﻿using System.Text;
 using Newtonsoft.Json;
 using WebHook.Core.Models;
-using WebHook.DispatchItemStore.Client;
-using WebHook.SubscriptionSotre.Client.Models;
 
 public class DispatcherMockClient : IDispatcherClient
 {

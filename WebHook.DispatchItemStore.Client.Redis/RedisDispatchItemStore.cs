@@ -2,7 +2,6 @@
 using Newtonsoft.Json.Linq;
 using StackExchange.Redis;
 using WebHook.Core.Models;
-using WebHook.SubscriptionSotre.Client.Models;
 
 namespace WebHook.DispatchItemStore.Client.Redis
 {
@@ -43,7 +42,7 @@ namespace WebHook.DispatchItemStore.Client.Redis
             }).ToList();
         }
 
-        public void DelayRequeue(DispatchItem item, TimeSpan delay)
+        public void Enqueue(DispatchItem item, TimeSpan delay)
         {
             Task.Factory.StartNew(async () =>
             {
@@ -89,7 +88,7 @@ namespace WebHook.DispatchItemStore.Client.Redis
             return returnItem;
         }
 
-        public void Put(DispatchItem item)
+        public void Enqueue(DispatchItem item)
         {
             RedisValue redisValue = ToRedisValue(item);
             Getdb().ListRightPush(dispatchListKey, redisValue);

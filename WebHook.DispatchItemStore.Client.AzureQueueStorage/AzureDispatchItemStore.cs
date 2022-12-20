@@ -27,7 +27,7 @@ namespace WebHook.DispatchItemStore.Client.AzureQueueStorage
             queue.CreateIfNotExists();
         }
 
-        public void DelayRequeue(DispatchItem item, TimeSpan delay)
+        public void Enqueue(DispatchItem item, TimeSpan delay)
         {
             QueueMessage message = inProgressMessages[item.Id];
             queue.UpdateMessage(message.MessageId, message.PopReceipt, message.Body, delay);
@@ -82,7 +82,7 @@ namespace WebHook.DispatchItemStore.Client.AzureQueueStorage
             return returnItem;
         }
 
-        public void Put(DispatchItem item)
+        public void Enqueue(DispatchItem item)
         {
             string stringItem = JsonConvert.SerializeObject(item, Formatting.None);
             queue.SendMessage(stringItem);
