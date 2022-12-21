@@ -6,14 +6,14 @@ using WebHook.Core.Models;
 
 namespace WebHook.DispatchItemStore.Client.AzureQueueStorage
 {
-    public class AzureDispatchItemStore : IDispatchItemStore
+    public class AzureDispatchItemQueue : IDispatchItemQueue
     {
         private readonly QueueClient _queue;
 
         //Concurrent since remove is taking place on different threads
         private readonly ConcurrentDictionary<Guid, QueueMessage> _inProgressMessages;
 
-        public AzureDispatchItemStore()
+        public AzureDispatchItemQueue()
         {
             _inProgressMessages = new();
             //TODO make from config
@@ -29,10 +29,16 @@ namespace WebHook.DispatchItemStore.Client.AzureQueueStorage
             _queue.CreateIfNotExists();
         }
 
-        public void Enqueue(DispatchItem item, TimeSpan delay)
+        public void Enqueue(DispatchItem item, TimeSpan? delay = null)
         {
-            QueueMessage message = _inProgressMessages[item.Id];
-            _queue.UpdateMessage(message.MessageId, message.PopReceipt, message.Body, delay);
+            if (_inProgressMessages.ContainsKey(item.Id)) {
+                QueueMessage message = _inProgressMessages[item.Id];
+                _queue.UpdateMessage(message.MessageId, message.PopReceipt, message.Body, delay ?? default);
+            }
+            else {
+                string stringItem = JsonConvert.SerializeObject(item, Formatting.None);
+                _queue.SendMessage(stringItem, visibilityTimeout: delay);
+            }
         }
 
         public IReadOnlyList<DispatchItem> GetNext(int maxMessages)
@@ -75,12 +81,6 @@ namespace WebHook.DispatchItemStore.Client.AzureQueueStorage
             }
 
             return returnItem;
-        }
-
-        public void Enqueue(DispatchItem item)
-        {
-            string stringItem = JsonConvert.SerializeObject(item, Formatting.None);
-            _queue.SendMessage(stringItem);
         }
 
         public void Remove(DispatchItem item)

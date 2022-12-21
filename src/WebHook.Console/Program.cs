@@ -37,6 +37,6 @@ internal partial class Program
 
         services.AddTransient<ProducerLoop>();
         services.AddSingleton<ISubscriptionStore, PostgresSubscriptionStore>();
-        services.AddSingleton<IDispatchItemStore, AzureDispatchItemStore>();
+        services.AddSingleton<IDispatchItemQueue, AzureDispatchItemQueue>();
     }
 }

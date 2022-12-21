@@ -4,7 +4,7 @@ using WebHook.DispatchItemStore.Client;
 
 namespace WebHook.Producer.Mocks;
 
-public class DispatchItemStoreMock : IDispatchItemStore
+public class DispatchItemStoreMock : IDispatchItemQueue
 {
     private readonly ILogger<DispatchItemStoreMock> _logger;
 
@@ -13,7 +13,7 @@ public class DispatchItemStoreMock : IDispatchItemStore
         _logger = logger;
     }
 
-    public void Enqueue(DispatchItem item, TimeSpan delay)
+    public void Enqueue(DispatchItem item, TimeSpan? delay = null)
     {
         throw new NotImplementedException();
     }

@@ -5,14 +5,14 @@ using WebHook.DispatchItemStore.Client;
 public class DispatcherLoop
 {
     private readonly int _windowSize;
-    private readonly IDispatchItemStore _dispatchItemStore;
+    private readonly IDispatchItemQueue _dispatchItemStore;
     private readonly IDispatcherClient _dispatcherClient;
     private readonly ILogger<DispatcherLoop> _logger;
     private readonly Queue<DispatchItem> _bufferedItems;
     private int _dispatchCount;
 
     public DispatcherLoop(
-        IDispatchItemStore dispatchItemStore,
+        IDispatchItemQueue dispatchItemStore,
         IDispatcherClient dispatcherClient,
         ILogger<DispatcherLoop> logger)
     {
@@ -49,8 +49,8 @@ public class DispatcherLoop
 
         //update item window
         while (cancellationToken.IsCancellationRequested is false) {
-            int finished = Task.WaitAny(tasks);
-            UpdateAtIndex(finished);
+            int finishedTask = Task.WaitAny(tasks);
+            UpdateAtIndex(finishedTask);
         }
         return;
 
@@ -63,9 +63,9 @@ public class DispatcherLoop
 
     private DispatchItem GetNextItem()
     {
-        int FetchAttempt = 0;
+        int fetchAttempt = 0;
         while (_bufferedItems.Count == 0) {
-            FetchAttempt++;
+            fetchAttempt++;
             IReadOnlyList<DispatchItem> newItems = _dispatchItemStore.GetNext(32);
             if (newItems.Count > 0) {
                 foreach (DispatchItem item in newItems) {
@@ -75,7 +75,7 @@ public class DispatcherLoop
             else {
                 //TODO configurable, caps, amounts figure it out
                 //https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-storage-queue-trigger?tabs=in-process%2Cextensionv5&pivots=programming-language-csharp#polling-algorithm
-                TimeSpan delay = TimeSpan.FromMilliseconds(100) * FetchAttempt;
+                TimeSpan delay = TimeSpan.FromMilliseconds(100) * fetchAttempt;
                 if (delay > TimeSpan.FromMinutes(1)) {
                     delay = TimeSpan.FromMinutes(1);
                 }

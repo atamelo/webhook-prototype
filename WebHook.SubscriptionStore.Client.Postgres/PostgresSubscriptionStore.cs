@@ -7,11 +7,11 @@ namespace WebHook.SubscriptionStore.Client.Postgres
 {
     public class PostgresSubscriptionStore : ISubscriptionStore
     {
-        private readonly WebhookContext _webhookContext;
-
         //TODO offload to redis or something so its shared across system
         //right now cache is super hacky and assumes subscriptsions never change
         private readonly Dictionary<string, IReadOnlyList<SubscriptionDTO>> _cache;
+
+        private readonly WebhookContext _webhookContext;
 
         public PostgresSubscriptionStore(WebhookContext webhookContext)
         {
@@ -24,16 +24,19 @@ namespace WebHook.SubscriptionStore.Client.Postgres
         public IReadOnlyList<SubscriptionDTO> GetSubscriptionsFor<TEvent>(TEvent @event, CancellationToken cancellationToken) where TEvent : IEvent
         {
             string key = $"{@event.EventId}_{@event.SubscriberId}";
-            if (_cache.ContainsKey(key) is false) {
-                List<SubscriptionEntity> subscriptions = _webhookContext.Subscriptions.Where(s =>
+
+            if (_cache.TryGetValue(key, out IReadOnlyList<SubscriptionDTO>? subscription))
+                return subscription;
+
+            List<SubscriptionEntity> subscriptions = _webhookContext.Subscriptions.Where(s =>
                 s.EventId == @event.EventId &&
                 s.TenantId == @event.SubscriberId &&
                 s.Active).ToList();
 
-                List<SubscriptionDTO> subscriptionDTOs = subscriptions.Select(Map).ToList();
-                _cache.Add(key, subscriptionDTOs);
-            }
-            return _cache[key];
+            List<SubscriptionDTO> subscriptionDTOs = subscriptions.Select(Map).ToList();
+
+            _cache.Add(key, subscriptionDTOs);
+            return subscriptionDTOs;
         }
 
         //TODO use auto mapper or some other library for this.

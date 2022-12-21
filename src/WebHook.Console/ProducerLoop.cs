@@ -11,12 +11,12 @@ namespace WebHook.Producer;
 public partial class ProducerLoop
 {
     private readonly ISubscriptionStore _subscriptionStore;
-    private readonly IDispatchItemStore _dispatchItemStore;
+    private readonly IDispatchItemQueue _dispatchItemStore;
     private readonly ILogger<ProducerLoop> _logger;
 
     public ProducerLoop(
         ISubscriptionStore subscriptionStore,
-        IDispatchItemStore dispatchItemStore,
+        IDispatchItemQueue dispatchItemStore,
         ILogger<ProducerLoop> logger)
     {
         _subscriptionStore = subscriptionStore;

@@ -5,7 +5,7 @@ using WebHook.Core.Models;
 
 namespace WebHook.DispatchItemStore.Client.Redis
 {
-    public class RedisDispatchItemStore : IDispatchItemStore
+    public class RedisDispatchItemQueue : IDispatchItemQueue
     {
         private readonly ConnectionMultiplexer _redis;
         private readonly RedisKey _dispatchListKey;
@@ -13,7 +13,7 @@ namespace WebHook.DispatchItemStore.Client.Redis
         private readonly Dictionary<Guid, RedisValue> _inProgressItems;
         private readonly Queue<DispatchItem> _retryQueue;
 
-        public RedisDispatchItemStore(string connectionString = "localhost", string nodeId = "localnode")
+        public RedisDispatchItemQueue(string connectionString = "localhost", string nodeId = "localnode")
         {
             //TODO HACKY DOCKER FIX
 #if !DEBUG
@@ -41,12 +41,17 @@ namespace WebHook.DispatchItemStore.Client.Redis
             }).ToList();
         }
 
-        public void Enqueue(DispatchItem item, TimeSpan delay)
+        public void Enqueue(DispatchItem item, TimeSpan? delay = null)
         {
-            Task.Factory.StartNew(async () => {
-                await Task.Delay(delay);
+            if (delay is null) {
                 _retryQueue.Enqueue(item);
-            });
+            }
+            else {
+                Task.Factory.StartNew(async () => {
+                    await Task.Delay(delay.Value);
+                    _retryQueue.Enqueue(item);
+                });
+            }
         }
 
         public IReadOnlyList<DispatchItem> GetNext(int count)

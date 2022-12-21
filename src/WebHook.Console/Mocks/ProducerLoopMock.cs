@@ -13,7 +13,7 @@ public class ProducerLoopMock : ProducerLoop
 
     public ProducerLoopMock(
         ISubscriptionStore subscriptionStore,
-        IDispatchItemStore dispatchItemStore,
+        IDispatchItemQueue dispatchItemStore,
         ILogger<ProducerLoop> logger,
         BlockingCollection<IEvent> source) : base(subscriptionStore, dispatchItemStore, logger)
     {

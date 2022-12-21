@@ -178,9 +178,9 @@ dotnet_style_parentheses_in_other_binary_operators = always_for_clarity:suggesti
 dotnet_style_parentheses_in_other_operators = never_if_unnecessary:suggestion
 
 # only use var when it's obvious what the variable type is
-csharp_style_var_for_built_in_types = true:silent
-csharp_style_var_when_type_is_apparent = true:silent
-csharp_style_var_elsewhere = true:silent
+csharp_style_var_for_built_in_types = false:error
+csharp_style_var_when_type_is_apparent = false:error
+csharp_style_var_elsewhere = false:error
 
 # supported (?)
 max_line_length = 120
@@ -263,6 +263,13 @@ dotnet_naming_rule.private_naming.symbols                  = private
 dotnet_naming_rule.private_naming.style = camel_case_style
 dotnet_naming_symbols.private.applicable_kinds             = event,field
 dotnet_naming_symbols.private.applicable_accessibilities   = private
+
+# For variables
+dotnet_naming_symbols.local_symbol.applicable_kinds = local
+dotnet_naming_style.local_style.capitalization = camel_case
+dotnet_naming_rule.variables_are_camel_case.severity = error
+dotnet_naming_rule.variables_are_camel_case.symbols = local_symbol
+dotnet_naming_rule.variables_are_camel_case.style = local_style
 
 # Internal must be camelCase with underscore
 dotnet_naming_rule.underscore_internal_naming.severity = warning
@@ -368,3 +375,6 @@ dotnet_diagnostic.IDE0040.severity = error
 # IDE1006: Naming Styles
 dotnet_diagnostic.IDE1006.severity = error
 
+
+# IDE0008: Use explicit type
+dotnet_diagnostic.IDE0008.severity = error
