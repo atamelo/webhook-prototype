@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using StackExchange.Redis;
 using WebHook.Core.Models;
@@ -7,11 +7,11 @@ namespace WebHook.DispatchItemStore.Client.Redis
 {
     public class RedisDispatchItemStore : IDispatchItemStore
     {
-        private readonly ConnectionMultiplexer redis;
-        private readonly RedisKey dispatchListKey;
-        private readonly RedisKey inProgressListKey;
-        private readonly Dictionary<Guid, RedisValue> inProgressItems;
-        private readonly Queue<DispatchItem> retryQueue;
+        private readonly ConnectionMultiplexer _redis;
+        private readonly RedisKey _dispatchListKey;
+        private readonly RedisKey _inProgressListKey;
+        private readonly Dictionary<Guid, RedisValue> _inProgressItems;
+        private readonly Queue<DispatchItem> _retryQueue;
 
         public RedisDispatchItemStore(string connectionString = "localhost", string nodeId = "localnode")
         {
@@ -20,46 +20,42 @@ namespace WebHook.DispatchItemStore.Client.Redis
                 connectionString = "redis:6379";
 #endif
 
-            redis = ConnectionMultiplexer.Connect(connectionString);
-            dispatchListKey = new RedisKey(nameof(dispatchListKey));
-            inProgressListKey = new RedisKey(nameof(inProgressListKey) + nodeId);
-            retryQueue = new Queue<DispatchItem>(GetInProgressList());
-            inProgressItems = new Dictionary<Guid, RedisValue>();
+            _redis = ConnectionMultiplexer.Connect(connectionString);
+            _dispatchListKey = new RedisKey(nameof(_dispatchListKey));
+            _inProgressListKey = new RedisKey(nameof(_inProgressListKey) + nodeId);
+            _retryQueue = new Queue<DispatchItem>(GetInProgressList());
+            _inProgressItems = new Dictionary<Guid, RedisValue>();
         }
 
         private IDatabase Getdb()
         {
-            return redis.GetDatabase();
+            return _redis.GetDatabase();
         }
 
         private IReadOnlyCollection<DispatchItem> GetInProgressList()
         {
-            return Getdb().ListRange(inProgressListKey).Select(rv =>
-            {
+            return Getdb().ListRange(_inProgressListKey).Select(rv => {
                 DispatchItem returnItem = ToDispatchItem(rv);
-                inProgressItems.Add(returnItem.Id, rv);
+                _inProgressItems.Add(returnItem.Id, rv);
                 return returnItem;
             }).ToList();
         }
 
         public void Enqueue(DispatchItem item, TimeSpan delay)
         {
-            Task.Factory.StartNew(async () =>
-            {
+            Task.Factory.StartNew(async () => {
                 await Task.Delay(delay);
-                retryQueue.Enqueue(item);
+                _retryQueue.Enqueue(item);
             });
         }
 
         public IReadOnlyList<DispatchItem> GetNext(int count)
         {
             List<DispatchItem> items = new();
-            for (int i = 0; i < count; i++)
-            {
+            for (int i = 0; i < count; i++) {
                 DispatchItem? item = GetNextOrDefault();
 
-                if (item is null)
-                {
+                if (item is null) {
                     return items;
                 }
 
@@ -70,20 +66,18 @@ namespace WebHook.DispatchItemStore.Client.Redis
 
         public DispatchItem? GetNextOrDefault()
         {
-            if (retryQueue.Any())
-            {
-                return retryQueue.Dequeue();
+            if (_retryQueue.Any()) {
+                return _retryQueue.Dequeue();
             }
 
-            RedisValue item = Getdb().ListMove(dispatchListKey, inProgressListKey, ListSide.Left, ListSide.Right);
+            RedisValue item = Getdb().ListMove(_dispatchListKey, _inProgressListKey, ListSide.Left, ListSide.Right);
 
-            if (item.HasValue is false)
-            {
+            if (item.HasValue is false) {
                 return null;
             }
 
             DispatchItem returnItem = ToDispatchItem(item);
-            inProgressItems.Add(returnItem.Id, item);
+            _inProgressItems.Add(returnItem.Id, item);
 
             return returnItem;
         }
@@ -91,15 +85,14 @@ namespace WebHook.DispatchItemStore.Client.Redis
         public void Enqueue(DispatchItem item)
         {
             RedisValue redisValue = ToRedisValue(item);
-            Getdb().ListRightPush(dispatchListKey, redisValue);
+            Getdb().ListRightPush(_dispatchListKey, redisValue);
         }
 
         public void Remove(DispatchItem item)
         {
-            if (inProgressItems.ContainsKey(item.Id))
-            {
-                Getdb().ListRemove(inProgressListKey, inProgressItems[item.Id]);
-                inProgressItems.Remove(item.Id);
+            if (_inProgressItems.ContainsKey(item.Id)) {
+                Getdb().ListRemove(_inProgressListKey, _inProgressItems[item.Id]);
+                _inProgressItems.Remove(item.Id);
             }
         }
 

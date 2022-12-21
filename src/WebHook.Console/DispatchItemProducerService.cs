@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Confluent.Kafka;
 
@@ -7,31 +7,30 @@ namespace WebHook.Producer;
 // TODO: inherit form BackgroundService instead?
 public class DispatchItemProducerService : IHostedService
 {
-    private readonly ProducerLoop producerLoop;
-    private readonly ILogger<DispatchItemProducerService> logger;
-    private readonly CancellationTokenSource cancellation;
+    private readonly ProducerLoop _producerLoop;
+    private readonly ILogger<DispatchItemProducerService> _logger;
+    private readonly CancellationTokenSource _cancellation;
 
-    private Task producerLoopTask;
+    private Task _producerLoopTask;
 
     public DispatchItemProducerService(ProducerLoop producerLoop, ILogger<DispatchItemProducerService> logger)
     {
-        this.producerLoop = producerLoop;
-        this.logger = logger;
-        this.cancellation = new CancellationTokenSource();
+        _producerLoop = producerLoop;
+        _logger = logger;
+        _cancellation = new CancellationTokenSource();
 
-        this.producerLoopTask = Task.CompletedTask;
+        _producerLoopTask = Task.CompletedTask;
     }
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        this.logger.LogInformation("Starting the service...");
+        _logger.LogInformation("Starting the service...");
 
         // TODO: read it from the .NET config system
         ProducerLoop.ProducerConfig producerConfig = new();
 
         // TODO: read it from a config file/env/commandline
-        ProducerLoop.EventLogConsumerConfig consumerConfig = new(new List<string> { "test-topic" })
-        {
+        ProducerLoop.EventLogConsumerConfig consumerConfig = new(new List<string> { "test-topic" }) {
             GroupId = "test-consumer-group",
             BootstrapServers = "localhost:9092",
             // Note: The AutoOffsetReset property determines the start offset in the event
@@ -42,13 +41,12 @@ public class DispatchItemProducerService : IHostedService
             AutoOffsetReset = AutoOffsetReset.Earliest
         };
 
-        this.producerLoopTask = Task.Factory.StartNew(() =>
-        {
+        _producerLoopTask = Task.Factory.StartNew(() => {
             // NOTE: when directly implementing IHostedService exceptions like this won't surface
             // until the stop (Ctrl-C) the service
             // Consider inheriting from BackgroundService instead
             //throw null;
-            this.producerLoop.Start(consumerConfig, this.cancellation.Token, commitBatchSize: producerConfig.CommitBatchSize);
+            _producerLoop.Start(consumerConfig, _cancellation.Token, commitBatchSize: producerConfig.CommitBatchSize);
         }, TaskCreationOptions.LongRunning);
 
         return Task.CompletedTask;
@@ -56,12 +54,12 @@ public class DispatchItemProducerService : IHostedService
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        this.logger.LogInformation("Stopping the service...");
+        _logger.LogInformation("Stopping the service...");
 
-        this.cancellation.Cancel();
+        _cancellation.Cancel();
         // NOTE: here is the point where exceptions are going to surface
-        await producerLoopTask;
+        await _producerLoopTask;
 
-        this.logger.LogInformation("Service stopped.");
+        _logger.LogInformation("Service stopped.");
     }
 }

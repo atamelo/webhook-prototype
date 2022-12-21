@@ -1,22 +1,22 @@
-﻿namespace MockWebHookEndpoint.Logic;
+namespace MockWebHookEndpoint.Logic;
 
 public class MockHelper
 {
-    private readonly Random random;
+    private readonly Random _random;
 
     public MockHelper()
     {
-        random = new();
+        _random = new();
     }
 
     public int RandomNext(int count)
     {
-        return random.Next(count);
+        return _random.Next(count);
     }
 
     public async Task RandomDelayAsync()
     {
-        int delay = random.Next(500, 7000);
+        int delay = _random.Next(500, 7000);
         await Task.Delay(delay);
     }
 }

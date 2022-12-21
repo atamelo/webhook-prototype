@@ -1,61 +1,54 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using WebHook.Core.Models;
 using WebHook.DispatchItemStore.Client;
 
 public class DispatcherLoop
 {
-    private readonly IDispatchItemStore dispatchItemStore;
-    private readonly IDispatcherClient dispatcherClient;
-    private readonly ILogger<DispatcherLoop> logger;
-    private readonly Queue<DispatchItem> bufferedItems = new Queue<DispatchItem>();
-
-    //TODO fill from config
-    private readonly int windowSize;
-
-    private int dispatchCount;
+    private readonly int _windowSize;
+    private readonly IDispatchItemStore _dispatchItemStore;
+    private readonly IDispatcherClient _dispatcherClient;
+    private readonly ILogger<DispatcherLoop> _logger;
+    private readonly Queue<DispatchItem> _bufferedItems;
+    private int _dispatchCount;
 
     public DispatcherLoop(
         IDispatchItemStore dispatchItemStore,
         IDispatcherClient dispatcherClient,
         ILogger<DispatcherLoop> logger)
     {
-        this.dispatchItemStore = dispatchItemStore;
-        this.dispatcherClient = dispatcherClient;
-        this.logger = logger;
-        this.windowSize = 1000;
-        this.dispatchCount = 0;
+        _dispatchItemStore = dispatchItemStore;
+        _dispatcherClient = dispatcherClient;
+        _logger = logger;
+        //TODO fill from config
+        _windowSize = 1000;
+        _dispatchCount = 0;
+        _bufferedItems = new();
     }
 
     public void Start(CancellationToken cancellationToken)
     {
-        try
-        {
+        try {
             RunDispatcher(cancellationToken);
         }
-        catch (Exception e)
-        {
-            logger.LogError(e, "Dispatcher loop critical failure");
+        catch (Exception e) {
+            _logger.LogError(e, "Dispatcher loop critical failure");
             throw;
         }
     }
 
     private void RunDispatcher(CancellationToken cancellationToken)
     {
-        Task[] tasks = new Task[windowSize];
+        Task[] tasks = new Task[_windowSize];
         //Fill window
-        for (int i = 0; i < windowSize; i++)
-        {
-            if (cancellationToken.IsCancellationRequested is true)
-            {
+        for (int i = 0; i < _windowSize; i++) {
+            if (cancellationToken.IsCancellationRequested is true) {
                 return;
             }
-
             UpdateAtIndex(i);
         }
 
         //update item window
-        while (cancellationToken.IsCancellationRequested is false)
-        {
+        while (cancellationToken.IsCancellationRequested is false) {
             int finished = Task.WaitAny(tasks);
             UpdateAtIndex(finished);
         }
@@ -71,47 +64,38 @@ public class DispatcherLoop
     private DispatchItem GetNextItem()
     {
         int FetchAttempt = 0;
-        while (bufferedItems.Count == 0)
-        {
+        while (_bufferedItems.Count == 0) {
             FetchAttempt++;
-            IReadOnlyList<DispatchItem> newItems = dispatchItemStore.GetNext(32);
-            if (newItems.Count > 0)
-            {
-                foreach (DispatchItem item in newItems)
-                {
-                    bufferedItems.Enqueue(item);
+            IReadOnlyList<DispatchItem> newItems = _dispatchItemStore.GetNext(32);
+            if (newItems.Count > 0) {
+                foreach (DispatchItem item in newItems) {
+                    _bufferedItems.Enqueue(item);
                 }
             }
-            else
-            {
+            else {
                 //TODO configurable, caps, amounts figure it out
                 //https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-storage-queue-trigger?tabs=in-process%2Cextensionv5&pivots=programming-language-csharp#polling-algorithm
                 TimeSpan delay = TimeSpan.FromMilliseconds(100) * FetchAttempt;
-                if (delay > TimeSpan.FromMinutes(1))
-                {
+                if (delay > TimeSpan.FromMinutes(1)) {
                     delay = TimeSpan.FromMinutes(1);
                 }
                 Thread.Sleep(delay);
             }
         }
-
-        return bufferedItems.Dequeue();
+        return _bufferedItems.Dequeue();
     }
 
     private async Task TryDispatch(DispatchItem @event)
     {
-        try
-        {
-            await dispatcherClient.DispatchAsync(@event);
-            dispatchItemStore.Remove(@event);
-            dispatchCount++;
-            if (dispatchCount % 100 == 0)
-            {
-                logger.LogInformation($"Success Dispatch Count: {dispatchCount}");
+        try {
+            await _dispatcherClient.DispatchAsync(@event);
+            _dispatchItemStore.Remove(@event);
+            _dispatchCount++;
+            if (_dispatchCount % 100 == 0) {
+                _logger.LogInformation($"Success Dispatch Count: {_dispatchCount}");
             }
         }
-        catch (Exception)
-        {
+        catch (Exception) {
             ProcessFailure(@event);
             //logger.LogError(e.Message, e);
         }
@@ -119,14 +103,13 @@ public class DispatcherLoop
 
     private void ProcessFailure(DispatchItem @event)
     {
-        if (@event.DispatchCount >= 3)
-        {
+        if (@event.DispatchCount >= 3) {
             //TODO pause sub via dbcontext
-            dispatchItemStore.Remove(@event);
+            _dispatchItemStore.Remove(@event);
             return;
         }
 
         TimeSpan retryDelay = TimeSpan.FromMinutes(1);
-        dispatchItemStore.Enqueue(@event, retryDelay);
+        _dispatchItemStore.Enqueue(@event, retryDelay);
     }
 }

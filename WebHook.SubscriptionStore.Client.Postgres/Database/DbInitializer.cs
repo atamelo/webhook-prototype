@@ -1,4 +1,4 @@
-﻿using WebHook.SubscriptionStore.Client.Postgres.Entities;
+using WebHook.SubscriptionStore.Client.Postgres.Entities;
 
 namespace WebHook.SubscriptionStore.Client.Postgres.Database
 {
@@ -10,14 +10,12 @@ namespace WebHook.SubscriptionStore.Client.Postgres.Database
 
             //TODO config all this out
             context.Database.EnsureCreated();
-            if (context.Subscriptions.Any())
-            {
+            if (context.Subscriptions.Any()) {
                 return;
             }
 
             Random random = new();
-            for (int i = 1; i < 1000; i++)
-            {
+            for (int i = 1; i < 1000; i++) {
                 SubscriptionEntity subscription = new();
                 subscription.Id = i;
                 subscription.EventId = random.Next(1, 10).ToString();

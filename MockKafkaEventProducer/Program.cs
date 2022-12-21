@@ -1,4 +1,4 @@
-﻿using Confluent.Kafka;
+using Confluent.Kafka;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using WebHook.Core.Events;

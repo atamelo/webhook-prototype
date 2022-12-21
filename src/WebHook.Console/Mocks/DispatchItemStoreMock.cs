@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using WebHook.Core.Models;
 using WebHook.DispatchItemStore.Client;
 
@@ -6,11 +6,11 @@ namespace WebHook.Producer.Mocks;
 
 public class DispatchItemStoreMock : IDispatchItemStore
 {
-    private readonly ILogger<DispatchItemStoreMock> logger;
+    private readonly ILogger<DispatchItemStoreMock> _logger;
 
     public DispatchItemStoreMock(ILogger<DispatchItemStoreMock> logger)
     {
-        this.logger = logger;
+        _logger = logger;
     }
 
     public void Enqueue(DispatchItem item, TimeSpan delay)

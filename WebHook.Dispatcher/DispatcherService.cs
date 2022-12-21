@@ -1,34 +1,33 @@
-﻿using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 public class DispatcherService : IHostedService
 {
-    private readonly CancellationTokenSource cancellation;
-    private readonly DispatcherLoop dispatcherLoop;
-    private readonly ILogger<DispatcherService> logger;
-    private Task dispatcherLoopTask;
+    private readonly CancellationTokenSource _cancellation;
+    private readonly DispatcherLoop _dispatcherLoop;
+    private readonly ILogger<DispatcherService> _logger;
+    private Task _dispatcherLoopTask;
 
     public DispatcherService(
         DispatcherLoop dispatcherLoop,
         ILogger<DispatcherService> logger)
     {
-        this.dispatcherLoop = dispatcherLoop;
-        this.logger = logger;
-        cancellation = new CancellationTokenSource();
-        dispatcherLoopTask = Task.CompletedTask;
+        _dispatcherLoop = dispatcherLoop;
+        _logger = logger;
+        _cancellation = new CancellationTokenSource();
+        _dispatcherLoopTask = Task.CompletedTask;
     }
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        logger.LogInformation("Starting the service...");
+        _logger.LogInformation("Starting the service...");
 
-        dispatcherLoopTask = Task.Factory.StartNew(() =>
-        {
+        _dispatcherLoopTask = Task.Factory.StartNew(() => {
             // NOTE: when directly implementing IHostedService exceptions like this won't surface
             // until the stop (Ctrl-C) the service
             // Consider inheriting from BackgroundService instead
             //throw null;
-            dispatcherLoop.Start(cancellation.Token);
+            _dispatcherLoop.Start(_cancellation.Token);
         }, TaskCreationOptions.LongRunning);
 
         return Task.CompletedTask;
@@ -36,12 +35,12 @@ public class DispatcherService : IHostedService
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        logger.LogInformation("Stopping the service...");
+        _logger.LogInformation("Stopping the service...");
 
-        cancellation.Cancel();
+        _cancellation.Cancel();
         // NOTE: here is the point where exceptions are going to surface
-        await dispatcherLoopTask;
+        await _dispatcherLoopTask;
 
-        logger.LogInformation("Service stopped.");
+        _logger.LogInformation("Service stopped.");
     }
 }

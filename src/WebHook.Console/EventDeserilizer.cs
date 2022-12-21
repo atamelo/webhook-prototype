@@ -1,4 +1,4 @@
-﻿using Confluent.Kafka;
+using Confluent.Kafka;
 using Newtonsoft.Json;
 using WebHook.Core.Events;
 using WebHook.DispatchItemStore.Client;
@@ -11,13 +11,11 @@ public partial class ProducerLoop
     {
         public IEvent Deserialize(ReadOnlySpan<byte> data, bool isNull, SerializationContext context)
         {
-            try
-            {
+            try {
                 string str = System.Text.Encoding.Default.GetString(data);
                 return JsonConvert.DeserializeObject<IEvent>(str, new EventConverter());
             }
-            catch (Exception)
-            {
+            catch (Exception) {
                 //TODO log fix etc
                 return null;
             }

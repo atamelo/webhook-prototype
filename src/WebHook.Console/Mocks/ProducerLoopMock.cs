@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using Microsoft.Extensions.Logging;
 using Confluent.Kafka;
 using WebHook.Core.Events;
@@ -9,7 +9,7 @@ namespace WebHook.Producer.Mocks;
 
 public class ProducerLoopMock : ProducerLoop
 {
-    private readonly BlockingCollection<IEvent> source;
+    private readonly BlockingCollection<IEvent> _source;
 
     public ProducerLoopMock(
         ISubscriptionStore subscriptionStore,
@@ -17,17 +17,17 @@ public class ProducerLoopMock : ProducerLoop
         ILogger<ProducerLoop> logger,
         BlockingCollection<IEvent> source) : base(subscriptionStore, dispatchItemStore, logger)
     {
-        this.source = source;
+        _source = source;
     }
 
     protected override IConsumer<string, IEvent> CreateEventLogConsumer(EventLogConsumerConfig config)
     {
-        return new KafkaConsumerMock(this.source);
+        return new KafkaConsumerMock(_source);
     }
 
     private class KafkaConsumerMock : IConsumer<string, IEvent>
     {
-        private readonly BlockingCollection<IEvent> source;
+        private readonly BlockingCollection<IEvent> _source;
 
         public string MemberId => throw new NotImplementedException();
 
@@ -43,7 +43,7 @@ public class ProducerLoopMock : ProducerLoop
 
         public KafkaConsumerMock(BlockingCollection<IEvent> source)
         {
-            this.source = source;
+            this._source = source;
         }
 
         public int AddBrokers(string brokers)
@@ -106,7 +106,7 @@ public class ProducerLoopMock : ProducerLoop
 
         public ConsumeResult<string, IEvent> Consume(CancellationToken cancellationToken = default)
         {
-            IEvent @event = source.Take(cancellationToken);
+            IEvent @event = _source.Take(cancellationToken);
 
             return new() { Message = new() { Key = "dummyKey", Value = @event } };
         }

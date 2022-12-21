@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using WebHook.DispatchItemStore.Client;
@@ -16,8 +16,7 @@ internal partial class Program
         IHost host =
             new HostBuilder()
                 .ConfigureServices(ConfigureServices)
-                .ConfigureLogging(loggingBuilder =>
-                {
+                .ConfigureLogging(loggingBuilder => {
                     loggingBuilder.AddSimpleConsole(options => options.UseUtcTimestamp = true);
                 })
                 .UseConsoleLifetime()
