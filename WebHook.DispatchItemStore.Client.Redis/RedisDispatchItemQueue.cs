@@ -44,7 +44,8 @@ namespace WebHook.DispatchItemStore.Client.Redis
         public void Enqueue(DispatchItem item, TimeSpan? delay = null)
         {
             if (delay is null) {
-                _retryQueue.Enqueue(item);
+                RedisValue redisValue = ToRedisValue(item);
+                Getdb().ListRightPush(_dispatchListKey, redisValue);
             }
             else {
                 Task.Factory.StartNew(async () => {
@@ -85,12 +86,6 @@ namespace WebHook.DispatchItemStore.Client.Redis
             _inProgressItems.Add(returnItem.Id, item);
 
             return returnItem;
-        }
-
-        public void Enqueue(DispatchItem item)
-        {
-            RedisValue redisValue = ToRedisValue(item);
-            Getdb().ListRightPush(_dispatchListKey, redisValue);
         }
 
         public void Remove(DispatchItem item)

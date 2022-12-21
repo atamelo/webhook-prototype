@@ -3,6 +3,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using WebHook.DispatchItemStore.Client;
 using WebHook.DispatchItemStore.Client.AzureQueueStorage;
+using WebHook.DispatchItemStore.Client.Redis;
 using WebHook.SubscriptionStore.Client;
 using WebHook.SubscriptionStore.Client.Postgres;
 using WebHook.SubscriptionStore.Client.Postgres.Extensions;
@@ -37,6 +38,6 @@ internal partial class Program
 
         services.AddTransient<ProducerLoop>();
         services.AddSingleton<ISubscriptionStore, PostgresSubscriptionStore>();
-        services.AddSingleton<IDispatchItemQueue, AzureDispatchItemQueue>();
+        services.AddSingleton<IDispatchItemQueue, RedisDispatchItemQueue>();
     }
 }

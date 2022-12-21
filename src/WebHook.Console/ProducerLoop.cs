@@ -64,7 +64,7 @@ public partial class ProducerLoop
                     eventLogConsumer.Commit(record);
                 }
             }
-            catch (OperationCanceledException) {
+            catch (Exception e) {
             }
         }
 

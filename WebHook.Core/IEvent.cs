@@ -1,4 +1,4 @@
-﻿namespace WebHook.Core.Events;
+namespace WebHook.Core.Events;
 
 public interface IEvent
 {

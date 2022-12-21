@@ -1,15 +1,19 @@
-﻿namespace WebHook.Core.Events;
+namespace WebHook.Core.Events;
 
 public class DummyEvent : IEvent
 {
-    public DummyEvent(string tenantID, string eventID, string payload)
+    public DummyEvent(string subscriberId, string eventID, string payload)
     {
-        SubscriberId = tenantID;
+        SubscriberId = subscriberId;
         EventId = eventID;
         Payload = payload;
     }
 
-    public string SubscriberId { get; }
-    public string EventId { get; }
-    public string Payload { get; }
+    public DummyEvent()
+    {
+    }
+
+    public string SubscriberId { get; set; }
+    public string EventId { get; set; }
+    public string Payload { get; set; }
 }
