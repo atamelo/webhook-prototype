@@ -1,9 +1,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using WebHook.DispatchItemStore.Client;
-using WebHook.DispatchItemStore.Client.AzureQueueStorage;
-using WebHook.DispatchItemStore.Client.Redis;
+using WebHook.DispatchItemQueue.Client;
+using WebHook.DispatchItemQueue.Client.AzureQueueStorage;
+using WebHook.DispatchItemQueue.Client.Redis;
 using WebHook.SubscriptionStore.Client;
 using WebHook.SubscriptionStore.Client.Postgres;
 using WebHook.SubscriptionStore.Client.Postgres.Extensions;

@@ -2,7 +2,7 @@ using Microsoft.Extensions.Logging;
 using Confluent.Kafka;
 using WebHook.Core.Events;
 using WebHook.Core.Models;
-using WebHook.DispatchItemStore.Client;
+using WebHook.DispatchItemQueue.Client;
 using WebHook.SubscriptionSotre.Client.Models;
 using WebHook.SubscriptionStore.Client;
 
@@ -11,16 +11,16 @@ namespace WebHook.Producer;
 public partial class ProducerLoop
 {
     private readonly ISubscriptionStore _subscriptionStore;
-    private readonly IDispatchItemQueue _dispatchItemStore;
+    private readonly IDispatchItemQueue _dispatchItemQueue;
     private readonly ILogger<ProducerLoop> _logger;
 
     public ProducerLoop(
         ISubscriptionStore subscriptionStore,
-        IDispatchItemQueue dispatchItemStore,
+        IDispatchItemQueue dispatchItemQueue,
         ILogger<ProducerLoop> logger)
     {
         _subscriptionStore = subscriptionStore;
-        _dispatchItemStore = dispatchItemStore;
+        _dispatchItemQueue = dispatchItemQueue;
         _logger = logger;
     }
 
@@ -48,7 +48,7 @@ public partial class ProducerLoop
 
                 foreach (SubscriptionDTO subscription in subscriptions) {
                     DispatchItem item = new(Guid.NewGuid(), record.Message.Value);
-                    _dispatchItemStore.EnqueueAsync(item).Wait();
+                    _dispatchItemQueue.EnqueueAsync(item).Wait();
                 }
 
                 eventsProcessed++;
@@ -57,7 +57,7 @@ public partial class ProducerLoop
 
                 // in reality, when multiple Producer nodes are deployed, the batchSize
                 // is only observed in scope of a single node. So, globally (or from the perspective
-                // of the dispatchItemStore), the size of a batch can be somewhere from 1 to
+                // of the dispatchItemQueue), the size of a batch can be somewhere from 1 to
                 // number_of_nodes * (batchSize - 1) items.
                 if (batchSizeReached) {
                     // NOTE: an only then do a commit at the source

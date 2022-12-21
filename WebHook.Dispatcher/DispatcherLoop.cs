@@ -1,26 +1,26 @@
 using Microsoft.Extensions.Logging;
 using WebHook.Core.Models;
-using WebHook.DispatchItemStore.Client;
+using WebHook.DispatchItemQueue.Client;
 
 public class DispatcherLoop
 {
     private readonly int _windowSize;
-    private readonly IDispatchItemQueue _dispatchItemStore;
+    private readonly IDispatchItemQueue _dispatchItemQueue;
     private readonly IDispatcherClient _dispatcherClient;
     private readonly ILogger<DispatcherLoop> _logger;
     private readonly Queue<DispatchItem> _bufferedItems;
     private int _dispatchCount;
 
     public DispatcherLoop(
-        IDispatchItemQueue dispatchItemStore,
+        IDispatchItemQueue dispatchItemQueue,
         IDispatcherClient dispatcherClient,
         ILogger<DispatcherLoop> logger)
     {
-        _dispatchItemStore = dispatchItemStore;
+        _dispatchItemQueue = dispatchItemQueue;
         _dispatcherClient = dispatcherClient;
         _logger = logger;
         //TODO fill from config
-        _windowSize = 100;
+        _windowSize = 10;
         _dispatchCount = 0;
         _bufferedItems = new();
     }
@@ -66,7 +66,7 @@ public class DispatcherLoop
         int fetchAttempt = 0;
         while (_bufferedItems.Count == 0) {
             fetchAttempt++;
-            IReadOnlyList<DispatchItem> newItems = _dispatchItemStore.GetNext(32);
+            IReadOnlyList<DispatchItem> newItems = _dispatchItemQueue.GetNext(32);
             if (newItems.Count > 0) {
                 foreach (DispatchItem item in newItems) {
                     _bufferedItems.Enqueue(item);
@@ -89,7 +89,7 @@ public class DispatcherLoop
     {
         try {
             await _dispatcherClient.DispatchAsync(@event);
-            _dispatchItemStore.Remove(@event);
+            _dispatchItemQueue.Remove(@event);
             _dispatchCount++;
             if (_dispatchCount % 5 == 0) {
                 Console.Clear();
@@ -106,11 +106,11 @@ public class DispatcherLoop
         //TODO logging metrics stuff
         if (@event.DispatchCount >= 3) {
             //TODO pause sub via dbcontext
-            _dispatchItemStore.Remove(@event);
+            _dispatchItemQueue.Remove(@event);
             return;
         }
 
         TimeSpan retryDelay = TimeSpan.FromMinutes(1);
-        await _dispatchItemStore.EnqueueAsync(@event, retryDelay);
+        await _dispatchItemQueue.EnqueueAsync(@event, retryDelay);
     }
 }

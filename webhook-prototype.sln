@@ -15,11 +15,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebHook.SubscriptionStore.W
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SubscriptionStore", "SubscriptionStore", "{489785E4-03C5-4100-816C-7CA751D970C6}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebHook.DispatchItemStore.Client", "WebHook.DispatchItemStore.Client\WebHook.DispatchItemStore.Client.csproj", "{6EC32576-C3A1-4329-A523-CF097E71E9E3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebHook.DispatchItemQueue.Client", "WebHook.DispatchItemQueue.Client\WebHook.DispatchItemQueue.Client.csproj", "{6EC32576-C3A1-4329-A523-CF097E71E9E3}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DispatchItemStore", "DispatchItemStore", "{80246D97-5A80-4AFE-AF2E-54320DA6BC7B}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DispatchItemQueue", "DispatchItemQueue", "{80246D97-5A80-4AFE-AF2E-54320DA6BC7B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebHook.DispatchItemStore.Client.Redis", "WebHook.DispatchItemStore.Client.Redis\WebHook.DispatchItemStore.Client.Redis.csproj", "{6795D3F9-B8B7-4D2B-9AAE-65E302ABD7AD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebHook.DispatchItemQueue.Client.Redis", "WebHook.DispatchItemQueue.Client.Redis\WebHook.DispatchItemQueue.Client.Redis.csproj", "{6795D3F9-B8B7-4D2B-9AAE-65E302ABD7AD}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker", "docker", "{76487C3D-FF96-4D92-A058-A3A0E8D827CB}"
 	ProjectSection(SolutionItems) = preProject
@@ -29,7 +29,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker", "docker", "{76487C
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebHook.SubscriptionStore.Client.Postgres", "WebHook.SubscriptionStore.Client.Postgres\WebHook.SubscriptionStore.Client.Postgres.csproj", "{8BF3AAB8-1551-4456-9AB3-291AB0211F39}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebHook.DispatchItemStore.Client.AzureQueueStorage", "WebHook.DispatchItemStore.Client.AzureQueueStorage\WebHook.DispatchItemStore.Client.AzureQueueStorage.csproj", "{53A7A0C6-050B-4128-AD52-2323D79B6B73}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebHook.DispatchItemQueue.Client.AzureQueueStorage", "WebHook.DispatchItemQueue.Client.AzureQueueStorage\WebHook.DispatchItemQueue.Client.AzureQueueStorage.csproj", "{53A7A0C6-050B-4128-AD52-2323D79B6B73}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Mocks", "Mocks", "{F00FC014-5E87-450B-9204-86829F8D5B7A}"
 EndProject

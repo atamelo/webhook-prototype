@@ -1,6 +1,6 @@
 using WebHook.Core.Models;
 
-namespace WebHook.DispatchItemStore.Client;
+namespace WebHook.DispatchItemQueue.Client;
 
 public interface IDispatchItemQueue
 {

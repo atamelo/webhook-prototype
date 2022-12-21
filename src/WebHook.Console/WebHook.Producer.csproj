@@ -12,9 +12,9 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\WebHook.Core\WebHook.Core.csproj" />
-    <ProjectReference Include="..\..\WebHook.DispatchItemStore.Client.AzureQueueStorage\WebHook.DispatchItemStore.Client.AzureQueueStorage.csproj" />
-    <ProjectReference Include="..\..\WebHook.DispatchItemStore.Client.Redis\WebHook.DispatchItemStore.Client.Redis.csproj" />
-    <ProjectReference Include="..\..\WebHook.DispatchItemStore.Client\WebHook.DispatchItemStore.Client.csproj" />
+    <ProjectReference Include="..\..\WebHook.DispatchItemQueue.Client.AzureQueueStorage\WebHook.DispatchItemQueue.Client.AzureQueueStorage.csproj" />
+    <ProjectReference Include="..\..\WebHook.DispatchItemQueue.Client.Redis\WebHook.DispatchItemQueue.Client.Redis.csproj" />
+    <ProjectReference Include="..\..\WebHook.DispatchItemQueue.Client\WebHook.DispatchItemQueue.Client.csproj" />
     <ProjectReference Include="..\..\WebHook.SubscriptionStore.Client.Postgres\WebHook.SubscriptionStore.Client.Postgres.csproj" />
     <ProjectReference Include="..\..\WebHook.SubscriptionStore.Client\WebHook.SubscriptionStore.Client.csproj" />
   </ItemGroup>

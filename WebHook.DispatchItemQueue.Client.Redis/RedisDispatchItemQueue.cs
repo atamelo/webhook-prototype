@@ -3,7 +3,7 @@ using Newtonsoft.Json.Linq;
 using StackExchange.Redis;
 using WebHook.Core.Models;
 
-namespace WebHook.DispatchItemStore.Client.Redis
+namespace WebHook.DispatchItemQueue.Client.Redis
 {
     public class RedisDispatchItemQueue : IDispatchItemQueue
     {

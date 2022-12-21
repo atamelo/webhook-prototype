@@ -1,7 +1,7 @@
 using Confluent.Kafka;
 using Newtonsoft.Json;
 using WebHook.Core.Events;
-using WebHook.DispatchItemStore.Client;
+using WebHook.DispatchItemQueue.Client;
 
 namespace WebHook.Producer;
 

@@ -4,7 +4,7 @@ using Azure.Storage.Queues.Models;
 using Newtonsoft.Json;
 using WebHook.Core.Models;
 
-namespace WebHook.DispatchItemStore.Client.AzureQueueStorage
+namespace WebHook.DispatchItemQueue.Client.AzureQueueStorage
 {
     public class AzureDispatchItemQueue : IDispatchItemQueue
     {

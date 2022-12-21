@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "WebHook.DispatchItemStore.Client.AzureQueueStorage": {
+    "WebHook.DispatchItemQueue.Client.AzureQueueStorage": {
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {

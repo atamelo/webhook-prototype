@@ -3,7 +3,7 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using WebHook.Core.Models;
-using WebHook.DispatchItemStore.Client;
+using WebHook.DispatchItemQueue.Client;
 
 namespace Webhook.Dispatcher.AzureFunction
 {

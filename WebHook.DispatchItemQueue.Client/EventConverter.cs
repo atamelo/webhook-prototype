@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using WebHook.Core.Events;
 
-namespace WebHook.DispatchItemStore.Client
+namespace WebHook.DispatchItemQueue.Client
 {
     public class EventConverter : JsonConverter
     {

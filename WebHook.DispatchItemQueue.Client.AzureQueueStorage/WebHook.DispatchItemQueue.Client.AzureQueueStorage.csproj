@@ -8,12 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Azure.Storage.Queues" Version="12.12.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
-    <PackageReference Include="StackExchange.Redis" Version="2.6.80" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\WebHook.DispatchItemStore.Client\WebHook.DispatchItemStore.Client.csproj" />
+    <ProjectReference Include="..\WebHook.Core\WebHook.Core.csproj" />
+    <ProjectReference Include="..\WebHook.DispatchItemQueue.Client\WebHook.DispatchItemQueue.Client.csproj" />
   </ItemGroup>
 
 </Project>

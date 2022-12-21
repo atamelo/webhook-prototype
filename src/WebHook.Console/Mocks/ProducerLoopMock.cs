@@ -2,7 +2,7 @@ using System.Collections.Concurrent;
 using Microsoft.Extensions.Logging;
 using Confluent.Kafka;
 using WebHook.Core.Events;
-using WebHook.DispatchItemStore.Client;
+using WebHook.DispatchItemQueue.Client;
 using WebHook.SubscriptionStore.Client;
 
 namespace WebHook.Producer.Mocks;
@@ -13,9 +13,9 @@ public class ProducerLoopMock : ProducerLoop
 
     public ProducerLoopMock(
         ISubscriptionStore subscriptionStore,
-        IDispatchItemQueue dispatchItemStore,
+        IDispatchItemQueue dispatchItemQueue,
         ILogger<ProducerLoop> logger,
-        BlockingCollection<IEvent> source) : base(subscriptionStore, dispatchItemStore, logger)
+        BlockingCollection<IEvent> source) : base(subscriptionStore, dispatchItemQueue, logger)
     {
         _source = source;
     }

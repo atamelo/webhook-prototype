@@ -1,4 +1,4 @@
-﻿namespace WebHook.DispatchItemStore.Client.Redis
+﻿namespace WebHook.DispatchItemQueue.Client.Redis
 {
     public class DelayQueue<T>
     {
