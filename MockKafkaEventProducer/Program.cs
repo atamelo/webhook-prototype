@@ -12,7 +12,7 @@ ProducerConfig config = new ProducerConfig { BootstrapServers = "localhost:9092"
 using (IProducer<Null, string> p = new ProducerBuilder<Null, string>(config).Build())
 {
     Random rand = new();
-
+    int count = 0;
     while (true)
     {
         try
@@ -20,6 +20,7 @@ using (IProducer<Null, string> p = new ProducerBuilder<Null, string>(config).Bui
             int tenantId = rand.Next(1, 100);
             int eventId = rand.Next(1, 10);
             DeliveryResult<Null, string> dr = await ProduceEvent(p, tenantId, eventId);
+            Console.WriteLine(count++);
         }
         catch (ProduceException<Null, string> e)
         {

@@ -9,9 +9,9 @@ namespace WebHook.DispatchItemStore.Client.Redis
     {
         private readonly ConnectionMultiplexer _redis;
         private readonly RedisKey _dispatchListKey;
-        private readonly RedisKey _inProgressListKey;
+        private readonly RedisKey _inProgressHashKey;
         private readonly Dictionary<Guid, RedisValue> _inProgressItems;
-        private readonly Queue<DispatchItem> _retryQueue;
+        private readonly DelayQueue<DispatchItem> _retryQueue;
 
         public RedisDispatchItemQueue(string connectionString = "localhost", string nodeId = "localnode")
         {
@@ -22,9 +22,9 @@ namespace WebHook.DispatchItemStore.Client.Redis
 
             _redis = ConnectionMultiplexer.Connect(connectionString);
             _dispatchListKey = new RedisKey(nameof(_dispatchListKey));
-            _inProgressListKey = new RedisKey(nameof(_inProgressListKey) + nodeId);
-            _retryQueue = new Queue<DispatchItem>(GetInProgressList());
+            _inProgressHashKey = new RedisKey(nameof(_inProgressHashKey) + nodeId);
             _inProgressItems = new Dictionary<Guid, RedisValue>();
+            _retryQueue = new DelayQueue<DispatchItem>(GetInProgressList());
         }
 
         private IDatabase Getdb()
@@ -34,24 +34,30 @@ namespace WebHook.DispatchItemStore.Client.Redis
 
         private IReadOnlyCollection<DispatchItem> GetInProgressList()
         {
-            return Getdb().ListRange(_inProgressListKey).Select(rv => {
-                DispatchItem returnItem = ToDispatchItem(rv);
-                _inProgressItems.Add(returnItem.Id, rv);
+            return Getdb().HashGetAll(_inProgressHashKey).Select(rv => {
+                RedisValue pointedValue = Getdb().StringGet(new RedisKey(rv.Name.ToString()));
+                DispatchItem returnItem = ToDispatchItem(pointedValue);
+                _inProgressItems.Add(returnItem.Id, rv.Value);
                 return returnItem;
             }).ToList();
         }
 
-        public void Enqueue(DispatchItem item, TimeSpan? delay = null)
+        public async Task EnqueueAsync(DispatchItem item, TimeSpan? delay = null)
         {
             if (delay is null) {
+                RedisKey redisKey = new(item.Id.ToString());
                 RedisValue redisValue = ToRedisValue(item);
-                Getdb().ListRightPush(_dispatchListKey, redisValue);
+                RedisValue keyAsValue = new(item.Id.ToString());
+
+                //using transactions, could also use Lua via Getdb().ScriptEvaluate...
+                ITransaction transaction = Getdb().CreateTransaction();
+                Task setStringTask = transaction.StringSetAsync(redisKey, redisValue);
+                Task setListTask = transaction.ListRightPushAsync(_dispatchListKey, keyAsValue);
+                Task executeTask = transaction.ExecuteAsync();
+                await Task.WhenAll(setStringTask, setListTask, executeTask);
             }
             else {
-                Task.Factory.StartNew(async () => {
-                    await Task.Delay(delay.Value);
-                    _retryQueue.Enqueue(item);
-                });
+                _retryQueue.Enqueue(item, delay.Value);
             }
         }
 
@@ -59,7 +65,7 @@ namespace WebHook.DispatchItemStore.Client.Redis
         {
             List<DispatchItem> items = new();
             for (int i = 0; i < count; i++) {
-                DispatchItem? item = GetNextOrDefault();
+                DispatchItem? item = GetNextOrDefault().Result;
 
                 if (item is null) {
                     return items;
@@ -70,20 +76,30 @@ namespace WebHook.DispatchItemStore.Client.Redis
             return items;
         }
 
-        public DispatchItem? GetNextOrDefault()
+        public async Task<DispatchItem?> GetNextOrDefault()
         {
             if (_retryQueue.Any()) {
                 return _retryQueue.Dequeue();
             }
+            RedisValue nextKey = Getdb().ListGetByIndex(_dispatchListKey, 0);
 
-            RedisValue item = Getdb().ListMove(_dispatchListKey, _inProgressListKey, ListSide.Left, ListSide.Right);
+            ITransaction transaction = Getdb().CreateTransaction();
+            transaction.AddCondition(Condition.ListIndexEqual(_dispatchListKey, 0, nextKey));
+            Task listPop = transaction.ListLeftPopAsync(_dispatchListKey);
+            Task hashSet = transaction.HashSetAsync(_inProgressHashKey, nextKey, nextKey);
+            Task<bool> execute = transaction.ExecuteAsync();
+            await Task.WhenAll(listPop, hashSet, execute);
 
-            if (item.HasValue is false) {
+            if (execute.Result is false) {
+                //Transaction failed, try again.
+                return await GetNextOrDefault();
+            }
+            if (nextKey.HasValue is false) {
                 return null;
             }
-
-            DispatchItem returnItem = ToDispatchItem(item);
-            _inProgressItems.Add(returnItem.Id, item);
+            RedisValue valueItem = Getdb().StringGet(new RedisKey(nextKey.ToString()));
+            DispatchItem returnItem = ToDispatchItem(valueItem);
+            _inProgressItems.Add(returnItem.Id, nextKey);
 
             return returnItem;
         }
@@ -91,7 +107,7 @@ namespace WebHook.DispatchItemStore.Client.Redis
         public void Remove(DispatchItem item)
         {
             if (_inProgressItems.ContainsKey(item.Id)) {
-                Getdb().ListRemove(_inProgressListKey, _inProgressItems[item.Id]);
+                Getdb().HashDelete(_inProgressHashKey, _inProgressItems[item.Id]);
                 _inProgressItems.Remove(item.Id);
             }
         }

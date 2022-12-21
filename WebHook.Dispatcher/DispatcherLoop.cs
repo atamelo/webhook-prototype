@@ -20,7 +20,7 @@ public class DispatcherLoop
         _dispatcherClient = dispatcherClient;
         _logger = logger;
         //TODO fill from config
-        _windowSize = 1000;
+        _windowSize = 100;
         _dispatchCount = 0;
         _bufferedItems = new();
     }
@@ -91,18 +91,19 @@ public class DispatcherLoop
             await _dispatcherClient.DispatchAsync(@event);
             _dispatchItemStore.Remove(@event);
             _dispatchCount++;
-            if (_dispatchCount % 100 == 0) {
+            if (_dispatchCount % 5 == 0) {
+                Console.Clear();
                 _logger.LogInformation($"Success Dispatch Count: {_dispatchCount}");
             }
         }
         catch (Exception) {
-            ProcessFailure(@event);
-            //logger.LogError(e.Message, e);
+            await ProcessFailureAsync(@event);
         }
     }
 
-    private void ProcessFailure(DispatchItem @event)
+    private async Task ProcessFailureAsync(DispatchItem @event)
     {
+        //TODO logging metrics stuff
         if (@event.DispatchCount >= 3) {
             //TODO pause sub via dbcontext
             _dispatchItemStore.Remove(@event);
@@ -110,6 +111,6 @@ public class DispatcherLoop
         }
 
         TimeSpan retryDelay = TimeSpan.FromMinutes(1);
-        _dispatchItemStore.Enqueue(@event, retryDelay);
+        await _dispatchItemStore.EnqueueAsync(@event, retryDelay);
     }
 }

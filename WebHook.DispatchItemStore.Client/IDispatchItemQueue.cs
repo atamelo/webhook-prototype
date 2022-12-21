@@ -6,7 +6,7 @@ public interface IDispatchItemQueue
 {
     void Remove(DispatchItem item);
 
-    void Enqueue(DispatchItem item, TimeSpan? delay = null);
-
     IReadOnlyList<DispatchItem> GetNext(int count);
+
+    Task EnqueueAsync(DispatchItem item, TimeSpan? delay = null);
 }

@@ -48,7 +48,7 @@ public partial class ProducerLoop
 
                 foreach (SubscriptionDTO subscription in subscriptions) {
                     DispatchItem item = new(Guid.NewGuid(), record.Message.Value);
-                    _dispatchItemStore.Enqueue(item);
+                    _dispatchItemStore.EnqueueAsync(item).Wait();
                 }
 
                 eventsProcessed++;
@@ -65,6 +65,7 @@ public partial class ProducerLoop
                 }
             }
             catch (Exception e) {
+                Console.WriteLine(e.ToString());
             }
         }
 

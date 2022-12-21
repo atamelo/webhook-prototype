@@ -29,15 +29,15 @@ namespace WebHook.DispatchItemStore.Client.AzureQueueStorage
             _queue.CreateIfNotExists();
         }
 
-        public void Enqueue(DispatchItem item, TimeSpan? delay = null)
+        public async Task EnqueueAsync(DispatchItem item, TimeSpan? delay = null)
         {
             if (_inProgressMessages.ContainsKey(item.Id)) {
                 QueueMessage message = _inProgressMessages[item.Id];
-                _queue.UpdateMessage(message.MessageId, message.PopReceipt, message.Body, delay ?? default);
+                await _queue.UpdateMessageAsync(message.MessageId, message.PopReceipt, message.Body, delay ?? default);
             }
             else {
                 string stringItem = JsonConvert.SerializeObject(item, Formatting.None);
-                _queue.SendMessage(stringItem, visibilityTimeout: delay);
+                await _queue.SendMessageAsync(stringItem, visibilityTimeout: delay);
             }
         }
 

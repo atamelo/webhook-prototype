@@ -13,18 +13,9 @@ public class DispatchItemStoreMock : IDispatchItemQueue
         _logger = logger;
     }
 
-    public void Enqueue(DispatchItem item, TimeSpan? delay = null)
-    {
-        throw new NotImplementedException();
-    }
+    public Task EnqueueAsync(DispatchItem item, TimeSpan? delay = null) => throw new NotImplementedException();
 
-    public IReadOnlyList<DispatchItem> GetNext(int count)
-    {
-        throw new NotImplementedException();
-    }
+    public IReadOnlyList<DispatchItem> GetNext(int count) => throw new NotImplementedException();
 
-    public void Remove(DispatchItem item)
-    {
-        throw new NotImplementedException();
-    }
+    public void Remove(DispatchItem item) => throw new NotImplementedException();
 }
