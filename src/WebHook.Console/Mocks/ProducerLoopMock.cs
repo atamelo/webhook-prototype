@@ -1,33 +1,33 @@
-﻿using Confluent.Kafka;
-using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
-using WebHook.Contracts.Events;
-using WebHook.DispatchItemStore.Client;
+using Microsoft.Extensions.Logging;
+using Confluent.Kafka;
+using WebHook.Core.Events;
+using WebHook.DispatchItemQueue.Client;
 using WebHook.SubscriptionStore.Client;
 
 namespace WebHook.Producer.Mocks;
 
 public class ProducerLoopMock : ProducerLoop
 {
-    private readonly BlockingCollection<IEvent> source;
+    private readonly BlockingCollection<IEvent> _source;
 
     public ProducerLoopMock(
         ISubscriptionStore subscriptionStore,
-        IDispatchItemStore dispatchItemStore,
+        IDispatchItemQueue dispatchItemQueue,
         ILogger<ProducerLoop> logger,
-        BlockingCollection<IEvent> source) : base(subscriptionStore, dispatchItemStore, logger)
+        BlockingCollection<IEvent> source) : base(subscriptionStore, dispatchItemQueue, logger)
     {
-        this.source = source;
+        _source = source;
     }
 
     protected override IConsumer<string, IEvent> CreateEventLogConsumer(EventLogConsumerConfig config)
     {
-        return new KafkaConsumerMock(this.source);
+        return new KafkaConsumerMock(_source);
     }
 
     private class KafkaConsumerMock : IConsumer<string, IEvent>
     {
-        private readonly BlockingCollection<IEvent> source;
+        private readonly BlockingCollection<IEvent> _source;
 
         public string MemberId => throw new NotImplementedException();
 
@@ -43,7 +43,7 @@ public class ProducerLoopMock : ProducerLoop
 
         public KafkaConsumerMock(BlockingCollection<IEvent> source)
         {
-            this.source = source;
+            this._source = source;
         }
 
         public int AddBrokers(string brokers)
@@ -106,7 +106,7 @@ public class ProducerLoopMock : ProducerLoop
 
         public ConsumeResult<string, IEvent> Consume(CancellationToken cancellationToken = default)
         {
-            IEvent @event = source.Take(cancellationToken);
+            IEvent @event = _source.Take(cancellationToken);
 
             return new() { Message = new() { Key = "dummyKey", Value = @event } };
         }

@@ -1,13 +1,14 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\WebHook.Contracts\WebHook.Contracts.csproj" />
+    <ProjectReference Include="..\WebHook.Core\WebHook.Core.csproj" />
   </ItemGroup>
 
 </Project>

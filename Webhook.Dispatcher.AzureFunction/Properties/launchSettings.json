@@ -1,0 +1,18 @@
+{
+  "profiles": {
+    "Webhook.Dispatcher.AzureFunction": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7219"
+    },
+    "Docker": {
+      "commandName": "Docker",
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
+      "httpPort": 34777,
+      "useSSL": false
+    },
+    "WSL": {
+      "commandName": "WSL2",
+      "distributionName": ""
+    }
+  }
+}

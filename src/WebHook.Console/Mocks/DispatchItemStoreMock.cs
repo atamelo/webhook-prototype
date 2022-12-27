@@ -1,33 +1,21 @@
-﻿using Microsoft.Extensions.Logging;
-using System.IO.Pipes;
-using WebHook.DispatchItemStore.Client;
+using Microsoft.Extensions.Logging;
+using WebHook.Core.Models;
+using WebHook.DispatchItemQueue.Client;
 
 namespace WebHook.Producer.Mocks;
 
-public class DispatchItemStoreMock : IDispatchItemStore
+public class DispatchItemQueueMock : IDispatchItemQueue
 {
-    private readonly ILogger<DispatchItemStoreMock> logger;
+    private readonly ILogger<DispatchItemQueueMock> _logger;
 
-    public DispatchItemStoreMock(ILogger<DispatchItemStoreMock> logger)
+    public DispatchItemQueueMock(ILogger<DispatchItemQueueMock> logger)
     {
-        this.logger = logger;
+        _logger = logger;
     }
 
-    public DispatchItem GetNext()
-    {
-        throw new NotImplementedException();
-    }
+    public Task EnqueueAsync(DispatchItem item, TimeSpan? delay = null) => throw new NotImplementedException();
 
-    public void PersistChanges()
-    {
-    }
+    public IReadOnlyList<DispatchItem> GetNext(int count) => throw new NotImplementedException();
 
-    public void Put(DispatchItem item)
-    {
-        this.logger.LogInformation("Dispatch item for subscriber {SubscriberID} with URL={Url} received.", item.Event.SubscriberID, item.EndpointUrl);
-    }
-
-    public void Remove(DispatchItem item)
-    {
-    }
+    public void Remove(DispatchItem item) => throw new NotImplementedException();
 }

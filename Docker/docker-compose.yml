@@ -1,0 +1,100 @@
+version: '2'
+networks:
+  app-network:
+    driver: bridge
+services:
+  redis:
+    image: docker.io/bitnami/redis:latest
+    environment:
+      # ALLOW_EMPTY_PASSWORD is recommended only for development.
+      - ALLOW_EMPTY_PASSWORD=yes
+      - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
+    ports:
+      - '127.0.0.1:6379:6379'
+    volumes:
+      - 'redis_data:/bitnami/redis/data'
+    networks:
+      - app-network
+    restart: always
+  #dispatcher:
+  #  build:
+  #    context: ../
+  #    dockerfile: DispatcherDockerfile
+  #  networks:
+  #    - app-network
+  mock_webhook:
+    build:
+      context: ../
+      dockerfile: MockWebHookEndpoint/Dockerfile
+    restart: always
+    ports:
+        - '51084:80'
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+    networks:
+      - app-network
+  db:
+    container_name: postgres_db
+    image: postgres:latest
+    restart: always
+    environment:
+        - POSTGRES_USER=postgres
+        - POSTGRES_PASSWORD=postgres
+    ports:
+        - '5432:5432'
+    volumes: 
+        - db:/var/lib/postgresql/data
+    networks:
+      - app-network
+  #pgadmin:
+  #  container_name: pgadmin4_container
+  #  image: dpage/pgadmin4
+  #  restart: always
+  #  environment:
+  #    PGADMIN_DEFAULT_EMAIL: admin@admin.com
+  #    PGADMIN_DEFAULT_PASSWORD: root
+  #  ports:
+  #    - "5050:80"
+  #  networks:
+  #    - app-network
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite
+    hostname: azurite
+    container_name: azurite
+    restart: always
+    command: "azurite --blobHost 0.0.0.0 --blobPort 10000 --queueHost 0.0.0.0 --queuePort 10001"
+    ports:
+      - "10000:10000"
+      - "10001:10001"
+      - "10002:10002"
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.3.0
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  broker:
+    image: confluentinc/cp-kafka:7.3.0
+    container_name: broker
+    restart: always
+    ports:
+    # To learn about configuring Kafka for access across networks see
+    # https://www.confluent.io/blog/kafka-client-cannot-connect-to-broker-on-aws-on-docker-etc/
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://broker:29092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+volumes:
+  redis_data:
+    driver: local
+  db:
+    driver: local
