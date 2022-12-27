@@ -1,10 +1,8 @@
-using Microsoft.Extensions.Logging;
 using Dapper;
 using Dapper.Contrib.Extensions;
 using Npgsql;
 using WebHook.Core.Events;
 using WebHook.SubscriptionSotre.Client.Models;
-using WebHook.SubscriptionStore.Client.Postgres.Database;
 using WebHook.SubscriptionStore.Client.Postgres.Entities;
 
 namespace WebHook.SubscriptionStore.Client.Postgres
@@ -29,6 +27,13 @@ namespace WebHook.SubscriptionStore.Client.Postgres
             else {
                 _connection.Insert(entity);
             }
+        }
+
+        public void Delete(string SubscriberId, int Id)
+        {
+            SubscriptionDTO dto = Get(SubscriberId, Id);
+            SubscriptionEntity entity = Map(dto);
+            _connection.Delete(entity);
         }
 
         public SubscriptionDTO Get(string SubscriberId, int Id)

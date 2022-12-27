@@ -4,6 +4,8 @@ using WebHook.SubscriptionStore.Client;
 
 namespace WebHook.SubscriptionStore.WebApi.Controllers
 {
+    //TODO security
+
     [ApiController]
     [Route("api/[controller]")]
     public class SubscriptionsController : ControllerBase
@@ -25,23 +27,24 @@ namespace WebHook.SubscriptionStore.WebApi.Controllers
         }
 
         // POST api/<SubscriptionsController>
-        [HttpPost]
+        [HttpPost("{subscriberId}")]
         public void Post([FromBody] SubscriptionDTO value)
         {
             _subscriptionStore.Save(value);
         }
 
         // PUT api/<SubscriptionsController>/5
-        [HttpPut]
+        [HttpPut("{subscriberId}")]
         public void Put([FromBody] SubscriptionDTO value)
         {
             _subscriptionStore.Save(value);
         }
 
         // DELETE api/<SubscriptionsController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+        [HttpDelete("{subscriberId}/{id}")]
+        public void Delete(string subscriberId, int id)
         {
+            _subscriptionStore.Delete(subscriberId, id);
         }
     }
 }
