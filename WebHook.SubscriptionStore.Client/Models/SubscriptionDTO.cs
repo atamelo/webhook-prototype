@@ -1,6 +1,10 @@
-﻿namespace WebHook.SubscriptionSotre.Client.Models;
+namespace WebHook.SubscriptionSotre.Client.Models;
 
 public class SubscriptionDTO
 {
+    public int Id { get; set; }
     public string Url { get; set; }
+    public bool Active { get; set; }
+    public string EventId { get; set; }
+    public string SubscriberId { get; set; }
 }

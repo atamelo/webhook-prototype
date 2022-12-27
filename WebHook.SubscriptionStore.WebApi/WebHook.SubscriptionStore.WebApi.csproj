@@ -8,7 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.4.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\WebHook.Core\WebHook.Core.csproj" />
+    <ProjectReference Include="..\WebHook.SubscriptionStore.Client.Postgres\WebHook.SubscriptionStore.Client.Postgres.csproj" />
     <ProjectReference Include="..\WebHook.SubscriptionStore.Client\WebHook.SubscriptionStore.Client.csproj" />
   </ItemGroup>
 

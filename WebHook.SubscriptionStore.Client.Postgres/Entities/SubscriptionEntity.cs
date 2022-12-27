@@ -1,14 +1,17 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WebHook.SubscriptionStore.Client.Postgres.Entities;
 
+[Table("subscriptions")]
 public class SubscriptionEntity
 {
     [Key]
-    public int Id { get; set; }
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int id { get; set; }
 
-    public string EventId { get; set; }
-    public string TenantId { get; set; }
-    public string Url { get; set; }
-    public bool Active { get; set; }
+    public string event_id { get; set; }
+    public string subscriber_id { get; set; }
+    public string url { get; set; }
+    public bool active { get; set; }
 }

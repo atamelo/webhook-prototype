@@ -14,11 +14,12 @@ namespace WebHook.SubscriptionStore.Client.Postgres.Extensions
                 options.UseNpgsql("Host=localhost:5432;Database=webhooks;Username=postgres;Password=postgres");
                 options.EnableSensitiveDataLogging(false);
             });
+            services.AddSingleton<ISubscriptionStore, PostgresSubscriptionStore>();
         }
 
-        public static void CreateDB(this IHost host)
+        public static void CreateDB(this IServiceProvider services)
         {
-            using (IServiceScope scope = host.Services.CreateScope()) {
+            using (IServiceScope scope = services.CreateScope()) {
                 WebhookContext context =
                     scope.ServiceProvider.GetRequiredService<WebhookContext>();
                 DbInitializer.InitializeMockData(context);

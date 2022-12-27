@@ -24,7 +24,7 @@ internal partial class Program
                 .Build();
 
         //Extension
-        host.CreateDB();
+        host.Services.CreateDB();
 
         await host.RunAsync();
     }
@@ -37,7 +37,7 @@ internal partial class Program
         services.AddSubscriptionStore();
 
         services.AddTransient<ProducerLoop>();
-        services.AddSingleton<ISubscriptionStore, PostgresSubscriptionStore>();
+
         services.AddSingleton<IDispatchItemQueue, RedisDispatchItemQueue>();
     }
 }
