@@ -1,26 +1,34 @@
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Reflection;
+using AutoMapper;
 using Dapper;
 using Dapper.Contrib.Extensions;
 using Npgsql;
 using WebHook.Core.Events;
 using WebHook.SubscriptionSotre.Client.Models;
 using WebHook.SubscriptionStore.Client.Postgres.Entities;
+using TableAttribute = System.ComponentModel.DataAnnotations.Schema.TableAttribute;
 
 namespace WebHook.SubscriptionStore.Client.Postgres
 {
     public class PostgresSubscriptionStore : ISubscriptionStore
     {
         private readonly NpgsqlConnection _connection;
-        private static readonly string SUBSCRIPTIONS_TABLE = "subscriptions";
+        private readonly IMapper _mapper;
+        private readonly string SubscriptionsTableName;
 
-        public PostgresSubscriptionStore()
+        public PostgresSubscriptionStore(IMapper mapper)
         {
             //TODO load connectionstring from config
             _connection = new NpgsqlConnection("Host=localhost:5432;Database=webhooks;Username=postgres;Password=postgres");
+            _mapper = mapper;
+            SubscriptionsTableName = typeof(SubscriptionEntity).GetCustomAttribute<TableAttribute>()?.Name
+                ?? throw new Exception("Entity must be marked with TableAttribute");
         }
 
-        public void Save(SubscriptionDTO subscriptionDTO)
+        public void Save(SubscriptionDto subscriptionDto)
         {
-            SubscriptionEntity entity = Map(subscriptionDTO);
+            SubscriptionEntity entity = _mapper.Map<SubscriptionEntity>(subscriptionDto);
             if (entity.id > 0) {
                 _connection.Update(entity);
             }
@@ -31,30 +39,44 @@ namespace WebHook.SubscriptionStore.Client.Postgres
 
         public void Delete(string SubscriberId, int Id)
         {
-            SubscriptionDTO dto = Get(SubscriberId, Id);
-            SubscriptionEntity entity = Map(dto);
+            SubscriptionDto Dto = Find(SubscriberId, Id);
+            SubscriptionEntity entity = _mapper.Map<SubscriptionEntity>(Dto);
             _connection.Delete(entity);
         }
 
-        public SubscriptionDTO Get(string SubscriberId, int Id)
+        public SubscriptionDto Find(string SubscriberId, int Id)
         {
-            string commandText = $"SELECT * FROM public.\"{SUBSCRIPTIONS_TABLE}\" " +
-                   $"WHERE {nameof(SubscriptionEntity.id)}  = @Id AND " +
-                   $"{nameof(SubscriptionEntity.subscriber_id)} = @SubscriberId";
+            string commandText = $"SELECT * FROM public.\"{SubscriptionsTableName}\" " +
+                   $"WHERE {nameof(SubscriptionEntity.id)}  = @Id";
 
             var param = new {
-                Id,
-                SubscriberId
+                Id
             };
 
             SubscriptionEntity subscription = _connection.QueryFirst<SubscriptionEntity>(commandText, param);
-            SubscriptionDTO dto = Map(subscription);
-            return dto;
+
+            SubscriptionDto Dto = _mapper.Map<SubscriptionDto>(subscription);
+            return Dto;
         }
 
-        public IReadOnlyList<SubscriptionDTO> GetSubscriptionsFor<TEvent>(TEvent @event, CancellationToken cancellationToken) where TEvent : IEvent
+        public IReadOnlyCollection<SubscriptionDto> GetAll(string SubscriberId)
         {
-            string commandText = $"SELECT * FROM {SUBSCRIPTIONS_TABLE} " +
+            string commandText = $"SELECT * FROM public.\"{SubscriptionsTableName}\" " +
+                   $"WHERE {nameof(SubscriptionEntity.subscriber_id)}  = @SubscriberId";
+
+            var param = new {
+                SubscriberId
+            };
+
+            IEnumerable<SubscriptionEntity> subscriptions = _connection.Query<SubscriptionEntity>(commandText, param);
+
+            List<SubscriptionDto> dtos = subscriptions.Select(_mapper.Map<SubscriptionDto>).ToList();
+            return dtos;
+        }
+
+        public IReadOnlyList<SubscriptionDto> GetActiveSubscriptionsFor<TEvent>(TEvent @event, CancellationToken cancellationToken) where TEvent : IEvent
+        {
+            string commandText = $"SELECT * FROM {SubscriptionsTableName} " +
                 $"WHERE {nameof(SubscriptionEntity.event_id)}  = @EventId AND " +
                 $"{nameof(SubscriptionEntity.subscriber_id)} = @SubscriberId AND " +
                 $"{nameof(SubscriptionEntity.active)} is true";
@@ -66,30 +88,7 @@ namespace WebHook.SubscriptionStore.Client.Postgres
 
             IEnumerable<SubscriptionEntity> result = _connection.Query<SubscriptionEntity>(commandText, param);
 
-            return result.Select(Map).ToList();
-        }
-
-        //TODO use auto mapper or some other library for this.
-        private static SubscriptionDTO Map(SubscriptionEntity s)
-        {
-            return new SubscriptionDTO {
-                Id = s.id,
-                Url = s.url,
-                Active = s.active,
-                EventId = s.event_id,
-                SubscriberId = s.subscriber_id
-            };
-        }
-
-        private static SubscriptionEntity Map(SubscriptionDTO s)
-        {
-            return new SubscriptionEntity {
-                id = s.Id,
-                url = s.Url,
-                active = s.Active,
-                event_id = s.EventId,
-                subscriber_id = s.SubscriberId
-            };
+            return result.Select(_mapper.Map<SubscriptionDto>).ToList();
         }
 
         public bool IsActive(int id)

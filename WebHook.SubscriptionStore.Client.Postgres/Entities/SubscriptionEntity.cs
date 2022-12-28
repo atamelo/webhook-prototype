@@ -13,7 +13,5 @@ public class SubscriptionEntity
     public string event_id { get; set; }
     public string subscriber_id { get; set; }
     public string url { get; set; }
-
-    //TODO Pause vs Active
     public bool active { get; set; }
 }

@@ -8,11 +8,13 @@ public class SubscriptionStoreMock : ISubscriptionStore
 {
     public void Delete(string SubscriberId, int Id) => throw new NotImplementedException();
 
-    public SubscriptionDTO Get(string SubscriberId, int Id) => throw new NotImplementedException();
+    public SubscriptionDto Find(string SubscriberId, int Id) => throw new NotImplementedException();
 
-    public IReadOnlyList<SubscriptionDTO> GetSubscriptionsFor<TEvent>(TEvent @event, CancellationToken cancellationToken) where TEvent : IEvent => throw new NotImplementedException();
+    public IReadOnlyCollection<SubscriptionDto> GetAll(string SubscriberId) => throw new NotImplementedException();
+
+    public IReadOnlyList<SubscriptionDto> GetActiveSubscriptionsFor<TEvent>(TEvent @event, CancellationToken cancellationToken) where TEvent : IEvent => throw new NotImplementedException();
 
     public bool IsActive(int subscriptionId) => throw new NotImplementedException();
 
-    public void Save(SubscriptionDTO subscriptionDTO) => throw new NotImplementedException();
+    public void Save(SubscriptionDto subscriptionDto) => throw new NotImplementedException();
 }

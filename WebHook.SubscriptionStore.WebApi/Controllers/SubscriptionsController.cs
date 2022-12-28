@@ -19,32 +19,62 @@ namespace WebHook.SubscriptionStore.WebApi.Controllers
             _logger = logger;
         }
 
-        // GET api/<SubscriptionsController>/5
+        // GET api/<SubscriptionsController>/5/6
         [HttpGet("{subscriberId}/{id}")]
-        public SubscriptionDTO Get(string subscriberId, int id)
+        public IActionResult Get(string subscriberId, int id)
         {
-            return _subscriptionStore.Get(subscriberId, id);
+            try {
+                SubscriptionDto result = _subscriptionStore.Find(subscriberId, id);
+                return new OkObjectResult(result);
+            }
+            catch (InvalidOperationException e) {
+                if (e.Message.Equals("Sequence contains no elements")) {
+                    return new NotFoundResult();
+                }
+                else {
+                    throw;
+                }
+            }
         }
 
-        // POST api/<SubscriptionsController>
+        // GET api/<SubscriptionsController>/5
+        [HttpGet("{subscriberId}")]
+        public IActionResult GetAll(string subscriberId)
+        {
+            IReadOnlyCollection<SubscriptionDto> result = _subscriptionStore.GetAll(subscriberId);
+            return new OkObjectResult(result);
+        }
+
+        // POST api/<SubscriptionsController>/5
         [HttpPost("{subscriberId}")]
-        public void Post([FromBody] SubscriptionDTO value)
+        public void Post([FromBody] SubscriptionDto value)
         {
             _subscriptionStore.Save(value);
         }
 
         // PUT api/<SubscriptionsController>/5
         [HttpPut("{subscriberId}")]
-        public void Put([FromBody] SubscriptionDTO value)
+        public void Put([FromBody] SubscriptionDto value)
         {
             _subscriptionStore.Save(value);
         }
 
-        // DELETE api/<SubscriptionsController>/5
+        // DELETE api/<SubscriptionsController>/5/6
         [HttpDelete("{subscriberId}/{id}")]
-        public void Delete(string subscriberId, int id)
+        public IActionResult Delete(string subscriberId, int id)
         {
-            _subscriptionStore.Delete(subscriberId, id);
+            try {
+                _subscriptionStore.Delete(subscriberId, id);
+                return new NoContentResult();
+            }
+            catch (InvalidOperationException e) {
+                if (e.Message.Equals("Sequence contains no elements")) {
+                    return new NotFoundResult();
+                }
+                else {
+                    throw;
+                }
+            }
         }
     }
 }

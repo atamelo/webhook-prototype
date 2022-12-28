@@ -44,9 +44,9 @@ public partial class ProducerLoop
 
                 // TODO: add extensive logging
 
-                IReadOnlyList<SubscriptionDTO> subscriptions = _subscriptionStore.GetSubscriptionsFor(record.Message.Value, stopSignal);
+                IReadOnlyList<SubscriptionDto> subscriptions = _subscriptionStore.GetActiveSubscriptionsFor(record.Message.Value, stopSignal);
 
-                foreach (SubscriptionDTO subscription in subscriptions) {
+                foreach (SubscriptionDto subscription in subscriptions) {
                     DispatchItem item = new(Guid.NewGuid(), record.Message.Value);
                     _dispatchItemQueue.EnqueueAsync(item).Wait();
                 }

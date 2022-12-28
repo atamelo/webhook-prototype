@@ -15,6 +15,7 @@ namespace WebHook.SubscriptionStore.Client.Postgres.Extensions
                 options.EnableSensitiveDataLogging(false);
             });
             services.AddSingleton<ISubscriptionStore, PostgresSubscriptionStore>();
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
         }
 
         public static void CreateDB(this IServiceProvider services)
