@@ -26,6 +26,7 @@ namespace WebHook.SubscriptionStore.Client.Postgres
                 ?? throw new Exception("Entity must be marked with TableAttribute");
         }
 
+        //TODO cache layer
         public void Save(SubscriptionDto subscriptionDto)
         {
             SubscriptionEntity entity = _mapper.Map<SubscriptionEntity>(subscriptionDto);
