@@ -20,16 +20,15 @@ namespace WebHook.SubscriptionStore.WebApi.Controllers
             _logger = logger;
         }
 
-       
         [HttpGet("{subscriberId}/{id}")]
         public IActionResult GetSubscriptionFor(string subscriberId, int id)
         {
-            SubscriptionDto? result = _subscriptionStore.GetSubscriptionFor(subscriberId, id);
-            if (result.SubscriberId.Equals(subscriberId, StringComparison.OrdinalIgnoreCase) is false) {
-                return new ObjectResult("SubscriberId mismatch") { StatusCode = 401 };
-            }
+            SubscriptionDto? result = _subscriptionStore.GetSubscriptionFor(id);
             if (result is null) {
                 return new NotFoundResult();
+            }
+            if (result.SubscriberId.Equals(subscriberId, StringComparison.OrdinalIgnoreCase) is false) {
+                return new ObjectResult("SubscriberId mismatch") { StatusCode = 401 };
             }
             return new OkObjectResult(result);
         }
@@ -68,7 +67,7 @@ namespace WebHook.SubscriptionStore.WebApi.Controllers
         [HttpDelete("{subscriberId}/{id}")]
         public IActionResult DeleteSubscription(string subscriberId, int id)
         {
-            _subscriptionStore.DeleteSubscription(subscriberId, id);
+            _subscriptionStore.DeleteSubscription(id);
             return new NoContentResult();
         }
     }

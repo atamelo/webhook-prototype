@@ -5,9 +5,9 @@ namespace WebHook.SubscriptionStore.Client;
 
 public interface ISubscriptionStore
 {
-    void DeleteSubscription(string SubscriberId, int Id);
+    void DeleteSubscription(int Id);
 
-    SubscriptionDto? GetSubscriptionFor(string SubscriberId, int Id);
+    SubscriptionDto? GetSubscriptionFor(int Id);
 
     IReadOnlyCollection<SubscriptionDto> GetSubscriptionsFor(string SubscriberId);
 

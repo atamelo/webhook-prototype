@@ -9,8 +9,14 @@ internal class SubscriptionStorageModel
 {
     public static SubscriptionStorageModel FromDto(SubscriptionDto subscriptionDto)
     {
+        SubscriptionStatus status = SubscriptionStatus.Active;
+        if (subscriptionDto.Disabled)
+            status = SubscriptionStatus.Disabled;
+        if (subscriptionDto.Paused)
+            status = SubscriptionStatus.Paused;
+
         SubscriptionStorageModel entity = new SubscriptionStorageModel() {
-            active = subscriptionDto.Active,
+            active = status,
             event_id = subscriptionDto.EventId,
             id = subscriptionDto.Id,
             subscriber_id = subscriptionDto.SubscriberId,
@@ -21,7 +27,11 @@ internal class SubscriptionStorageModel
 
     public SubscriptionDto ToDto()
     {
-        return new SubscriptionDto(id, url, active, event_id, subscriber_id);
+        bool _active = active.Equals(SubscriptionStatus.Active);
+        bool _disabled = active.Equals(SubscriptionStatus.Disabled);
+        bool _paused = active.Equals(SubscriptionStatus.Paused);
+
+        return new SubscriptionDto(id, url, _active, _paused, _disabled, event_id, subscriber_id);
     }
 
     [Key]
@@ -31,5 +41,12 @@ internal class SubscriptionStorageModel
     public string event_id { get; init; }
     public string subscriber_id { get; init; }
     public string url { get; init; }
-    public bool active { get; init; }
+    public SubscriptionStatus active { get; init; }
+}
+
+internal enum SubscriptionStatus
+{
+    Active,
+    Paused,
+    Disabled
 }

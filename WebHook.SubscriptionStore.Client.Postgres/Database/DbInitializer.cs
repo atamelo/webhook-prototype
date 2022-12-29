@@ -19,7 +19,7 @@ namespace WebHook.SubscriptionStore.Client.Postgres.Database
                 SubscriptionStorageModel subscription = new() {
                     event_id = random.Next(1, 10).ToString(),
                     subscriber_id = random.Next(1, 100).ToString(),
-                    active = true,
+                    active = SubscriptionStatus.Active,
                     url = "http://localhost:5678/webhook",
                     //TODO config this as well
                 };

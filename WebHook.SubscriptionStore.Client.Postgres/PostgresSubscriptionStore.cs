@@ -56,9 +56,9 @@ namespace WebHook.SubscriptionStore.Client.Postgres
             }
         }
 
-        public void DeleteSubscription(string SubscriberId, int Id)
+        public void DeleteSubscription(int Id)
         {
-            SubscriptionDto? Dto = GetSubscriptionFor(SubscriberId, Id);
+            SubscriptionDto? Dto = GetSubscriptionFor(Id);
 
             if (Dto is null)
                 return;
@@ -68,7 +68,7 @@ namespace WebHook.SubscriptionStore.Client.Postgres
             DeleteFromCache(Dto);
         }
 
-        public SubscriptionDto? GetSubscriptionFor(string SubscriberId, int Id)
+        public SubscriptionDto? GetSubscriptionFor(int Id)
         {
             RedisValue cached = FindInCache(Id);
             if (cached.HasValue) {
@@ -135,10 +135,11 @@ namespace WebHook.SubscriptionStore.Client.Postgres
 
         public IReadOnlyList<SubscriptionDto> GetActiveSubscriptionsFor<TEvent>(TEvent @event, CancellationToken cancellationToken) where TEvent : IEvent
         {
+            //TODO figure out how to cache lists
             string commandText = $"SELECT * FROM {SubscriptionsTableName} " +
                 $"WHERE {nameof(SubscriptionStorageModel.event_id)}  = @EventId AND " +
                 $"{nameof(SubscriptionStorageModel.subscriber_id)} = @SubscriberId AND " +
-                $"{nameof(SubscriptionStorageModel.active)} is true";
+                $"{nameof(SubscriptionStorageModel.active)} = 0";
 
             var param = new {
                 @event.EventId,
@@ -147,12 +148,21 @@ namespace WebHook.SubscriptionStore.Client.Postgres
 
             IEnumerable<SubscriptionStorageModel> result = _connection.Query<SubscriptionStorageModel>(commandText, param);
 
-            return result.Select(r => r.ToDto()).ToList();
+            List<SubscriptionDto> dtos = result.Select(r => r.ToDto()).ToList();
+
+            dtos.ForEach(AddToCache);
+
+            return dtos;
         }
 
         public bool IsActive(int id)
         {
-            return _connection.Get<SubscriptionStorageModel>(id).active;
+            SubscriptionDto? subscription = GetSubscriptionFor(id);
+
+            if (subscription == null)
+                return false;
+
+            return subscription.Active;
         }
     }
 }
