@@ -43,7 +43,7 @@ public class ProducerLoopMock : ProducerLoop
 
         public KafkaConsumerMock(BlockingCollection<IEvent> source)
         {
-            this._source = source;
+            _source = source;
         }
 
         public int AddBrokers(string brokers)

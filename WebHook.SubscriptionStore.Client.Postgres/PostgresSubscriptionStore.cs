@@ -1,12 +1,12 @@
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;
-using AutoMapper;
 using Dapper;
 using Dapper.Contrib.Extensions;
+using Newtonsoft.Json;
 using Npgsql;
+using StackExchange.Redis;
 using WebHook.Core.Events;
 using WebHook.SubscriptionSotre.Client.Models;
-using WebHook.SubscriptionStore.Client.Postgres.Entities;
+using WebHook.SubscriptionStore.Client.Postgres.StorageModels;
 using TableAttribute = System.ComponentModel.DataAnnotations.Schema.TableAttribute;
 
 namespace WebHook.SubscriptionStore.Client.Postgres
@@ -14,87 +14,145 @@ namespace WebHook.SubscriptionStore.Client.Postgres
     public class PostgresSubscriptionStore : ISubscriptionStore
     {
         private readonly NpgsqlConnection _connection;
-        private readonly IMapper _mapper;
         private readonly string SubscriptionsTableName;
+        private readonly ConnectionMultiplexer _redis;
+        private readonly RedisKey subscriptionKey;
 
-        public PostgresSubscriptionStore(IMapper mapper)
+        public PostgresSubscriptionStore()
         {
             //TODO load connectionstring from config
             _connection = new NpgsqlConnection("Host=localhost:5432;Database=webhooks;Username=postgres;Password=postgres");
-            _mapper = mapper;
-            SubscriptionsTableName = typeof(SubscriptionEntity).GetCustomAttribute<TableAttribute>()?.Name
+            SubscriptionsTableName = typeof(SubscriptionStorageModel).GetCustomAttribute<TableAttribute>()?.Name
                 ?? throw new Exception("Entity must be marked with TableAttribute");
+            _redis = ConnectionMultiplexer.Connect("localhost");
+            subscriptionKey = new RedisKey("subscriptions");
         }
+
+        private IDatabase database => _redis.GetDatabase();
 
         //TODO cache layer
-        public void Save(SubscriptionDto subscriptionDto)
+
+        public int CreateSubscription(SubscriptionDto subscriptionDto)
         {
-            SubscriptionEntity entity = _mapper.Map<SubscriptionEntity>(subscriptionDto);
-            if (entity.id > 0) {
-                _connection.Update(entity);
+            SubscriptionStorageModel entity = SubscriptionStorageModel.FromDto(subscriptionDto);
+            if (entity.id == 0) {
+                int id = (int)_connection.Insert(entity);
+                return id;
             }
             else {
-                _connection.Insert(entity);
+                throw new Exception("Subscription already has an Id and has been inserted.");
             }
         }
 
-        public void Delete(string SubscriberId, int Id)
+        public void UpdateSubscription(SubscriptionDto subscriptionDto)
         {
-            SubscriptionDto Dto = Find(SubscriberId, Id);
-            SubscriptionEntity entity = _mapper.Map<SubscriptionEntity>(Dto);
-            _connection.Delete(entity);
+            SubscriptionStorageModel entity = SubscriptionStorageModel.FromDto(subscriptionDto);
+            if (entity.id > 0) {
+                _connection.Update(entity);
+                DeleteFromCache(subscriptionDto);
+            }
+            else {
+                throw new Exception("Subscription must have a valid Id to be updated.");
+            }
         }
 
-        public SubscriptionDto Find(string SubscriberId, int Id)
+        public void DeleteSubscription(string SubscriberId, int Id)
         {
+            SubscriptionDto? Dto = GetSubscriptionFor(SubscriberId, Id);
+
+            if (Dto is null)
+                return;
+
+            SubscriptionStorageModel entity = SubscriptionStorageModel.FromDto(Dto);
+            _connection.Delete(entity);
+            DeleteFromCache(Dto);
+        }
+
+        public SubscriptionDto? GetSubscriptionFor(string SubscriberId, int Id)
+        {
+            RedisValue cached = FindInCache(Id);
+            if (cached.HasValue) {
+                return ToDto(cached);
+            }
             string commandText = $"SELECT * FROM public.\"{SubscriptionsTableName}\" " +
-                   $"WHERE {nameof(SubscriptionEntity.id)}  = @Id";
+                   $"WHERE {nameof(SubscriptionStorageModel.id)}  = @Id";
 
             var param = new {
                 Id
             };
 
-            SubscriptionEntity subscription = _connection.QueryFirst<SubscriptionEntity>(commandText, param);
+            SubscriptionStorageModel subscription = _connection.QueryFirstOrDefault<SubscriptionStorageModel>(commandText, param);
 
-            SubscriptionDto Dto = _mapper.Map<SubscriptionDto>(subscription);
+            if (subscription is null)
+                return null;
+
+            SubscriptionDto Dto = subscription.ToDto();
+            AddToCache(Dto);
             return Dto;
         }
 
-        public IReadOnlyCollection<SubscriptionDto> GetAll(string SubscriberId)
+        private void AddToCache(SubscriptionDto dto)
+        {
+            RedisValue idKey = new RedisValue(dto.Id.ToString());
+            string value = JsonConvert.SerializeObject(dto);
+            RedisValue cacheObj = new RedisValue(value);
+            HashEntry[] hashEntries = new HashEntry[] { new(idKey, cacheObj) };
+            database.HashSet(subscriptionKey, hashEntries);
+        }
+
+        private SubscriptionDto ToDto(RedisValue cached)
+        {
+            return JsonConvert.DeserializeObject<SubscriptionDto>(cached.ToString());
+        }
+
+        private void DeleteFromCache(SubscriptionDto subscriptionDto) =>
+            database.HashDelete(subscriptionKey, new RedisValue(subscriptionDto.Id.ToString()));
+
+        private RedisValue FindInCache(int id)
+        {
+            RedisValue idKey = new RedisValue(id.ToString());
+            bool exists = database.HashExists(subscriptionKey, idKey);
+            if (exists) {
+                return database.HashGet(subscriptionKey, idKey);
+            }
+            return RedisValue.Null;
+        }
+
+        public IReadOnlyCollection<SubscriptionDto> GetSubscriptionsFor(string SubscriberId)
         {
             string commandText = $"SELECT * FROM public.\"{SubscriptionsTableName}\" " +
-                   $"WHERE {nameof(SubscriptionEntity.subscriber_id)}  = @SubscriberId";
+                   $"WHERE {nameof(SubscriptionStorageModel.subscriber_id)}  = @SubscriberId";
 
             var param = new {
                 SubscriberId
             };
 
-            IEnumerable<SubscriptionEntity> subscriptions = _connection.Query<SubscriptionEntity>(commandText, param);
+            IEnumerable<SubscriptionStorageModel> subscriptions = _connection.Query<SubscriptionStorageModel>(commandText, param);
 
-            List<SubscriptionDto> dtos = subscriptions.Select(_mapper.Map<SubscriptionDto>).ToList();
+            List<SubscriptionDto> dtos = subscriptions.Select(e => e.ToDto()).ToList();
             return dtos;
         }
 
         public IReadOnlyList<SubscriptionDto> GetActiveSubscriptionsFor<TEvent>(TEvent @event, CancellationToken cancellationToken) where TEvent : IEvent
         {
             string commandText = $"SELECT * FROM {SubscriptionsTableName} " +
-                $"WHERE {nameof(SubscriptionEntity.event_id)}  = @EventId AND " +
-                $"{nameof(SubscriptionEntity.subscriber_id)} = @SubscriberId AND " +
-                $"{nameof(SubscriptionEntity.active)} is true";
+                $"WHERE {nameof(SubscriptionStorageModel.event_id)}  = @EventId AND " +
+                $"{nameof(SubscriptionStorageModel.subscriber_id)} = @SubscriberId AND " +
+                $"{nameof(SubscriptionStorageModel.active)} is true";
 
             var param = new {
                 @event.EventId,
                 @event.SubscriberId
             };
 
-            IEnumerable<SubscriptionEntity> result = _connection.Query<SubscriptionEntity>(commandText, param);
+            IEnumerable<SubscriptionStorageModel> result = _connection.Query<SubscriptionStorageModel>(commandText, param);
 
-            return result.Select(_mapper.Map<SubscriptionDto>).ToList();
+            return result.Select(r => r.ToDto()).ToList();
         }
 
         public bool IsActive(int id)
         {
-            return _connection.Get<SubscriptionEntity>(id).active;
+            return _connection.Get<SubscriptionStorageModel>(id).active;
         }
     }
 }

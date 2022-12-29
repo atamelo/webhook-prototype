@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using WebHook.SubscriptionStore.Client.Postgres.Database;
 
 namespace WebHook.SubscriptionStore.Client.Postgres.Extensions
@@ -15,7 +14,6 @@ namespace WebHook.SubscriptionStore.Client.Postgres.Extensions
                 options.EnableSensitiveDataLogging(false);
             });
             services.AddSingleton<ISubscriptionStore, PostgresSubscriptionStore>();
-            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
         }
 
         public static void CreateDB(this IServiceProvider services)

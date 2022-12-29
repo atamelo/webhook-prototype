@@ -5,15 +5,17 @@ namespace WebHook.SubscriptionStore.Client;
 
 public interface ISubscriptionStore
 {
-    void Delete(string SubscriberId, int Id);
+    void DeleteSubscription(string SubscriberId, int Id);
 
-    SubscriptionDto Find(string SubscriberId, int Id);
+    SubscriptionDto? GetSubscriptionFor(string SubscriberId, int Id);
 
-    IReadOnlyCollection<SubscriptionDto> GetAll(string SubscriberId);
+    IReadOnlyCollection<SubscriptionDto> GetSubscriptionsFor(string SubscriberId);
 
     IReadOnlyList<SubscriptionDto> GetActiveSubscriptionsFor<TEvent>(TEvent @event, CancellationToken cancellationToken) where TEvent : IEvent;
 
     bool IsActive(int subscriptionId);
 
-    void Save(SubscriptionDto subscriptionDto);
+    int CreateSubscription(SubscriptionDto subscriptionDto);
+
+    void UpdateSubscription(SubscriptionDto subscriptionDto);
 }

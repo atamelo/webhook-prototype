@@ -1,4 +1,4 @@
-using WebHook.SubscriptionStore.Client.Postgres.Entities;
+using WebHook.SubscriptionStore.Client.Postgres.StorageModels;
 
 namespace WebHook.SubscriptionStore.Client.Postgres.Database
 {
@@ -16,11 +16,13 @@ namespace WebHook.SubscriptionStore.Client.Postgres.Database
 
             Random random = new();
             for (int i = 1; i < 1000; i++) {
-                SubscriptionEntity subscription = new();
-                subscription.event_id = random.Next(1, 10).ToString();
-                subscription.subscriber_id = random.Next(1, 100).ToString();
-                subscription.active = true;
-                subscription.url = "http://localhost:5678/webhook";//TODO config this as well
+                SubscriptionStorageModel subscription = new() {
+                    event_id = random.Next(1, 10).ToString(),
+                    subscriber_id = random.Next(1, 100).ToString(),
+                    active = true,
+                    url = "http://localhost:5678/webhook",
+                    //TODO config this as well
+                };
 
                 context.Subscriptions.Add(subscription);
             }

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
 using WebHook.SubscriptionSotre.Client.Models;
 using WebHook.SubscriptionStore.Client;
 
@@ -19,62 +20,56 @@ namespace WebHook.SubscriptionStore.WebApi.Controllers
             _logger = logger;
         }
 
-        // GET api/<SubscriptionsController>/5/6
+       
         [HttpGet("{subscriberId}/{id}")]
-        public IActionResult Get(string subscriberId, int id)
+        public IActionResult GetSubscriptionFor(string subscriberId, int id)
         {
-            try {
-                SubscriptionDto result = _subscriptionStore.Find(subscriberId, id);
-                return new OkObjectResult(result);
+            SubscriptionDto? result = _subscriptionStore.GetSubscriptionFor(subscriberId, id);
+            if (result.SubscriberId.Equals(subscriberId, StringComparison.OrdinalIgnoreCase) is false) {
+                return new ObjectResult("SubscriberId mismatch") { StatusCode = 401 };
             }
-            catch (InvalidOperationException e) {
-                if (e.Message.Equals("Sequence contains no elements")) {
-                    return new NotFoundResult();
-                }
-                else {
-                    throw;
-                }
+            if (result is null) {
+                return new NotFoundResult();
             }
+            return new OkObjectResult(result);
         }
 
         // GET api/<SubscriptionsController>/5
         [HttpGet("{subscriberId}")]
-        public IActionResult GetAll(string subscriberId)
+        public IActionResult GetSubscriptionsFor(string subscriberId)
         {
-            IReadOnlyCollection<SubscriptionDto> result = _subscriptionStore.GetAll(subscriberId);
+            IReadOnlyCollection<SubscriptionDto> result = _subscriptionStore.GetSubscriptionsFor(subscriberId);
             return new OkObjectResult(result);
         }
 
         // POST api/<SubscriptionsController>/5
         [HttpPost("{subscriberId}")]
-        public void Post([FromBody] SubscriptionDto value)
+        public IActionResult CreateSubscription(string subscriberId, [FromBody] SubscriptionDto value)
         {
-            _subscriptionStore.Save(value);
+            if (value.SubscriberId.Equals(subscriberId, StringComparison.OrdinalIgnoreCase) is false) {
+                return new ObjectResult("SubscriberId mismatch") { StatusCode = 401 };
+            }
+            int id = _subscriptionStore.CreateSubscription(value);
+            return new OkObjectResult(id);
         }
 
         // PUT api/<SubscriptionsController>/5
         [HttpPut("{subscriberId}")]
-        public void Put([FromBody] SubscriptionDto value)
+        public IActionResult UpdateSubscription(string subscriberId, [FromBody] SubscriptionDto value)
         {
-            _subscriptionStore.Save(value);
+            if (value.SubscriberId.Equals(subscriberId, StringComparison.OrdinalIgnoreCase) is false) {
+                return new ObjectResult("SubscriberId mismatch") { StatusCode = 401 };
+            }
+            _subscriptionStore.UpdateSubscription(value);
+            return new NoContentResult();
         }
 
         // DELETE api/<SubscriptionsController>/5/6
         [HttpDelete("{subscriberId}/{id}")]
-        public IActionResult Delete(string subscriberId, int id)
+        public IActionResult DeleteSubscription(string subscriberId, int id)
         {
-            try {
-                _subscriptionStore.Delete(subscriberId, id);
-                return new NoContentResult();
-            }
-            catch (InvalidOperationException e) {
-                if (e.Message.Equals("Sequence contains no elements")) {
-                    return new NotFoundResult();
-                }
-                else {
-                    throw;
-                }
-            }
+            _subscriptionStore.DeleteSubscription(subscriberId, id);
+            return new NoContentResult();
         }
     }
 }
