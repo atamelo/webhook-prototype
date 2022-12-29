@@ -13,9 +13,9 @@ public interface ISubscriptionStore
 
     IReadOnlyList<SubscriptionDto> GetActiveSubscriptionsFor<TEvent>(TEvent @event, CancellationToken cancellationToken) where TEvent : IEvent;
 
-    bool IsActive(int subscriptionId);
-
     int CreateSubscription(SubscriptionDto subscriptionDto);
 
     void UpdateSubscription(SubscriptionDto subscriptionDto);
+
+    SubscriptionStatus GetStatus(int id);
 }

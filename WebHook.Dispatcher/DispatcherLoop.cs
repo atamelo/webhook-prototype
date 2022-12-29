@@ -1,12 +1,15 @@
 using Microsoft.Extensions.Logging;
 using WebHook.Core.Models;
 using WebHook.DispatchItemQueue.Client;
+using WebHook.SubscriptionSotre.Client.Models;
+using WebHook.SubscriptionStore.Client;
 
 public class DispatcherLoop
 {
     private readonly int _windowSize;
     private readonly IDispatchItemQueue _dispatchItemQueue;
     private readonly IDispatcherClient _dispatcherClient;
+    private readonly ISubscriptionStore _subscriptionStore;
     private readonly ILogger<DispatcherLoop> _logger;
     private readonly Queue<DispatchItem> _bufferedItems;
     private int _dispatchCount;
@@ -14,10 +17,12 @@ public class DispatcherLoop
     public DispatcherLoop(
         IDispatchItemQueue dispatchItemQueue,
         IDispatcherClient dispatcherClient,
+        ISubscriptionStore subscriptionStore,
         ILogger<DispatcherLoop> logger)
     {
         _dispatchItemQueue = dispatchItemQueue;
         _dispatcherClient = dispatcherClient;
+        _subscriptionStore = subscriptionStore;
         _logger = logger;
         //TODO fill from config
         _windowSize = 10;
@@ -88,12 +93,30 @@ public class DispatcherLoop
     private async Task TryDispatch(DispatchItem @event)
     {
         try {
-            await _dispatcherClient.DispatchAsync(@event);
-            _dispatchItemQueue.Remove(@event);
-            _dispatchCount++;
-            if (_dispatchCount % 5 == 0) {
-                Console.Clear();
-                _logger.LogInformation($"Success Dispatch Count: {_dispatchCount}");
+            //check status just before dispatch
+            SubscriptionStatus status = _subscriptionStore.GetStatus(@event.SubscriptionId);
+            switch (status) {
+                case SubscriptionStatus.Active: {
+                        await _dispatcherClient.DispatchAsync(@event);
+                        _dispatchItemQueue.Remove(@event);
+                        _dispatchCount++;
+                        if (_dispatchCount % 100 == 0) {
+                            Console.Clear();
+                            _logger.LogInformation($"Success Dispatch Count: {_dispatchCount}");
+                        }
+                        break;
+                    }
+
+                case SubscriptionStatus.Paused:
+                    //Todo, maybe config maybe per subscription?
+                    TimeSpan retryDelay = TimeSpan.FromHours(1);
+                    await _dispatchItemQueue.EnqueueAsync(@event, retryDelay);
+                    break;
+
+                case SubscriptionStatus.Disabled: {
+                        _dispatchItemQueue.Remove(@event);
+                        break;
+                    }
             }
         }
         catch (Exception) {

@@ -16,7 +16,7 @@ namespace WebHook.SubscriptionStore.Client.Postgres.Extensions
             services.AddSingleton<ISubscriptionStore, PostgresSubscriptionStore>();
         }
 
-        public static void CreateDB(this IServiceProvider services)
+        public static void CreateDatabase(this IServiceProvider services)
         {
             using (IServiceScope scope = services.CreateScope()) {
                 WebhookContext context =

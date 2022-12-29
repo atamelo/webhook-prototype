@@ -139,7 +139,7 @@ namespace WebHook.SubscriptionStore.Client.Postgres
             string commandText = $"SELECT * FROM {SubscriptionsTableName} " +
                 $"WHERE {nameof(SubscriptionStorageModel.event_id)}  = @EventId AND " +
                 $"{nameof(SubscriptionStorageModel.subscriber_id)} = @SubscriberId AND " +
-                $"{nameof(SubscriptionStorageModel.active)} = 0";
+                $"{nameof(SubscriptionStorageModel.status)} = 0";
 
             var param = new {
                 @event.EventId,
@@ -155,14 +155,14 @@ namespace WebHook.SubscriptionStore.Client.Postgres
             return dtos;
         }
 
-        public bool IsActive(int id)
+        public SubscriptionStatus GetStatus(int id)
         {
             SubscriptionDto? subscription = GetSubscriptionFor(id);
 
             if (subscription == null)
-                return false;
+                return SubscriptionStatus.Disabled;
 
-            return subscription.Active;
+            return subscription.Status;
         }
     }
 }

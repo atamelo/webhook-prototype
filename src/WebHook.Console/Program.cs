@@ -24,7 +24,7 @@ internal partial class Program
                 .Build();
 
         //Extension
-        host.Services.CreateDB();
+        host.Services.CreateDatabase();
 
         await host.RunAsync();
     }

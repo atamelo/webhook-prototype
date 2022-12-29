@@ -31,7 +31,7 @@ public class Program
 
         app.MapControllers();
 
-        app.Services.CreateDB();
+        app.Services.CreateDatabase();
 
         app.Run();
     }
