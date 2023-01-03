@@ -1,6 +1,10 @@
-﻿namespace WebHook.SubscriptionSotre.Client.Models;
+namespace WebHook.SubscriptionSotre.Client.Models;
 
-public class SubscriptionDTO
+public record SubscriptionDto(int Id, string Url, SubscriptionStatus Status, string EventId, string SubscriberId);
+
+public enum SubscriptionStatus
 {
-    public string Url { get; set; }
+    Active,
+    Paused,
+    Disabled
 }

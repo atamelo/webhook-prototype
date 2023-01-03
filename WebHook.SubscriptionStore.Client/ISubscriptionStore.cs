@@ -1,12 +1,21 @@
-﻿using WebHook.Core.Events;
+using WebHook.Core.Events;
 using WebHook.SubscriptionSotre.Client.Models;
 
 namespace WebHook.SubscriptionStore.Client;
 
 public interface ISubscriptionStore
 {
-    //TODO Pause vs Active
-    IReadOnlyList<SubscriptionDTO> GetSubscriptionsFor<TEvent>(TEvent @event, CancellationToken cancellationToken) where TEvent : IEvent;
+    void DeleteSubscription(int Id);
 
-    bool IsActive(int subscriptionId);
+    SubscriptionDto? GetSubscriptionFor(int Id);
+
+    IReadOnlyCollection<SubscriptionDto> GetSubscriptionsFor(string SubscriberId);
+
+    IReadOnlyList<SubscriptionDto> GetActiveSubscriptionsFor<TEvent>(TEvent @event, CancellationToken cancellationToken) where TEvent : IEvent;
+
+    int CreateSubscription(SubscriptionDto subscriptionDto);
+
+    void UpdateSubscription(SubscriptionDto subscriptionDto);
+
+    SubscriptionStatus GetStatus(int id);
 }

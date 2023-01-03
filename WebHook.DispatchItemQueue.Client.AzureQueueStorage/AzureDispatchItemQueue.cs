@@ -31,13 +31,13 @@ namespace WebHook.DispatchItemQueue.Client.AzureQueueStorage
 
         public async Task EnqueueAsync(DispatchItem item, TimeSpan? delay = null)
         {
+            string messageText = JsonConvert.SerializeObject(item, Formatting.None);
             if (_inProgressMessages.ContainsKey(item.Id)) {
                 QueueMessage message = _inProgressMessages[item.Id];
-                await _queue.UpdateMessageAsync(message.MessageId, message.PopReceipt, message.Body, delay ?? default);
+                await _queue.UpdateMessageAsync(message.MessageId, message.PopReceipt, messageText, delay ?? default);
             }
             else {
-                string stringItem = JsonConvert.SerializeObject(item, Formatting.None);
-                await _queue.SendMessageAsync(stringItem, visibilityTimeout: delay);
+                await _queue.SendMessageAsync(messageText, visibilityTimeout: delay);
             }
         }
 

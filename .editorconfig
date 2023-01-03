@@ -373,7 +373,7 @@ dotnet_naming_style.prefix_underscore.required_prefix = _
 dotnet_diagnostic.IDE0040.severity = error
 
 # IDE1006: Naming Styles
-dotnet_diagnostic.IDE1006.severity = error
+dotnet_diagnostic.IDE1006.severity = suggestion
 
 
 # IDE0008: Use explicit type
