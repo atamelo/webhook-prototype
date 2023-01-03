@@ -35,25 +35,15 @@ namespace WebHook.SubscriptionStore.Client.Postgres
         public int CreateSubscription(SubscriptionDto subscriptionDto)
         {
             SubscriptionStorageModel entity = SubscriptionStorageModel.FromDto(subscriptionDto);
-            if (entity.id == 0) {
-                int id = (int)_connection.Insert(entity);
-                return id;
-            }
-            else {
-                throw new Exception("Subscription already has an Id and has been inserted.");
-            }
+            int id = (int)_connection.Insert(entity);
+            return id;
         }
 
         public void UpdateSubscription(SubscriptionDto subscriptionDto)
         {
             SubscriptionStorageModel entity = SubscriptionStorageModel.FromDto(subscriptionDto);
-            if (entity.id > 0) {
-                _connection.Update(entity);
-                DeleteFromCache(subscriptionDto);
-            }
-            else {
-                throw new Exception("Subscription must have a valid Id to be updated.");
-            }
+            _connection.Update(entity);
+            DeleteFromCache(subscriptionDto);
         }
 
         public void DeleteSubscription(int Id)

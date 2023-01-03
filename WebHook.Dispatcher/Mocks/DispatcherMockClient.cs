@@ -13,10 +13,10 @@ public class DispatcherMockClient : IDispatcherClient
 
     public async Task DispatchAsync(DispatchItem item)
     {
-        item.DispatchCount++;
+        item.IncreaseCount();
         string json = JsonConvert.SerializeObject(item);
         StringContent stringContent = new StringContent(json, UnicodeEncoding.UTF8, "application/json");
-        HttpResponseMessage result = await _client.PostAsync("http://localhost:51084/Webhook", stringContent);
+        HttpResponseMessage result = await _client.PostAsync(item.Url, stringContent);
         result.EnsureSuccessStatusCode();
         return;
     }

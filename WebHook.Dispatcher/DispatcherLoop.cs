@@ -120,6 +120,7 @@ public class DispatcherLoop
             }
         }
         catch (Exception) {
+            //TODO figure out specifics for exception types
             await ProcessFailureAsync(@event);
         }
     }

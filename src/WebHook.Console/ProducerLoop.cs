@@ -47,7 +47,7 @@ public partial class ProducerLoop
                 IReadOnlyList<SubscriptionDto> subscriptions = _subscriptionStore.GetActiveSubscriptionsFor(record.Message.Value, stopSignal);
 
                 foreach (SubscriptionDto subscription in subscriptions) {
-                    DispatchItem item = new(Guid.NewGuid(), record.Message.Value, subscription.Id);
+                    DispatchItem item = new(Guid.NewGuid(), record.Message.Value, subscription.Id, subscription.Url);
                     _dispatchItemQueue.EnqueueAsync(item).Wait();
                 }
 
