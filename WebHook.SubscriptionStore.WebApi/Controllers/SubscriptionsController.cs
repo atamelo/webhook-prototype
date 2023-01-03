@@ -41,8 +41,8 @@ namespace WebHook.SubscriptionStore.WebApi.Controllers
             return new OkObjectResult(result);
         }
 
-        // POST api/<SubscriptionsController>/5
-        [HttpPost("{subscriberId}")]
+        // PUT api/<SubscriptionsController>/5
+        [HttpPut("{subscriberId}")]
         public IActionResult CreateSubscription(string subscriberId, [FromBody] SubscriptionDto value)
         {
             if (value.SubscriberId.Equals(subscriberId, StringComparison.OrdinalIgnoreCase) is false) {
@@ -52,8 +52,8 @@ namespace WebHook.SubscriptionStore.WebApi.Controllers
             return new OkObjectResult(id);
         }
 
-        // PUT api/<SubscriptionsController>/5
-        [HttpPut("{subscriberId}")]
+        // POST api/<SubscriptionsController>/5
+        [HttpPost("{subscriberId}")]
         public IActionResult UpdateSubscription(string subscriberId, [FromBody] SubscriptionDto value)
         {
             if (value.SubscriberId.Equals(subscriberId, StringComparison.OrdinalIgnoreCase) is false) {
